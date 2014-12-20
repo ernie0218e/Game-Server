@@ -87,6 +87,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="Blast.cpp" />
+    <ClCompile Include="Block.cpp" />
+    <ClCompile Include="Bomb.cpp" />
+    <ClCompile Include="MainCharacter.cpp" />
+    <ClCompile Include="MainGame.cpp" />
+    <ClCompile Include="Map.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -95,9 +102,16 @@
     <ClCompile Include="TCPServer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Blast.h" />
+    <ClInclude Include="Block.h" />
+    <ClInclude Include="Bomb.h" />
     <ClInclude Include="Form1.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="MainCharacter.h" />
+    <ClInclude Include="MainGame.h" />
+    <ClInclude Include="Map.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TCPServer.h" />

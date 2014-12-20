@@ -33,6 +33,27 @@
     <ClCompile Include="TCPServer.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
+    <ClCompile Include="Blast.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Block.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Bomb.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="MainCharacter.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="MainGame.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Form1.h">
@@ -47,10 +68,36 @@
     <ClInclude Include="TCPServer.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="Blast.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Block.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Bomb.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="MainCharacter.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="MainGame.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc">
       <Filter>資源檔</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Form1.resX">
+      <Filter>資源檔</Filter>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
