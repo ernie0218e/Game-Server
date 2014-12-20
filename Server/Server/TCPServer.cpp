@@ -1,8 +1,29 @@
 ﻿#include "StdAfx.h"
 #include "TCPServer.h"
 
+MainGame *game;
 
 TCPServer::TCPServer(void){
+	
+}
+
+TCPServer::~TCPServer()
+{
+	tcpListener->Stop();
+	listenThread->Abort();
+	gameThread->Abort();
+	socketList->Clear();
+}
+
+void TCPServer::Start()
+{
+	//******Game Initial************
+	game = new MainGame();
+	game->Init();
+	//******End Game Initial********
+	//******new	a game thread*******
+	this->gameThread = gcnew Thread(gcnew ThreadStart(this, &TCPServer::gameStart));
+	//******End*********************
 	array <IPAddress^> ^myip = Dns::GetHostAddresses(Dns::GetHostName());
 	IP= Convert::ToString(myip[4]);
 	System::Diagnostics::Debug::WriteLine(IP);
@@ -14,13 +35,11 @@ TCPServer::TCPServer(void){
 	this->listenThread->Start();
 }
 
-TCPServer::~TCPServer()
-{
-	tcpListener->Stop();
-	listenThread->Abort();
-	socketList->Clear();
+void TCPServer::gameStart(void){
+	for(;;){
+		game->Update();
+	}
 }
-
 
 void TCPServer::ListenForClients(void){
 	//start the tcpListener

@@ -11,16 +11,15 @@ public:
 	~MainGame();
 
 	bool Init();
-	void Update(float t);
-	void Render(float t);
-
+	void Update();
 	//need to be public, in order to let server R/W
-	char ***blockMap;
 	Map *mainMap;
-	int ***blastMap;
 	MainCharacter *mainChar;
 
 private:
+
+	int ***blastMap;
+	char ***blockMap;
 	void MoveMainChar(MainCharacter *mainChar);
 	void FrameDelay();
 	void CheckHit(MainCharacter *mainChar);

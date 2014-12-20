@@ -7,24 +7,25 @@
 #pragma comment(lib, "Winmm.lib")
 
 
+MainGame::MainGame()
+{
+
+}
+
+
 //之後要在此新增一個Game，以及新增Character
 bool MainGame::Init()
 {
-	/*
+	
 	mainMap = new Map();
-	mainChar = new MainCharacter(m_ClientWidth / 2, m_ClientHeight / 2, 0);
-	*/
-
-	//mainMap->MakeMap();
-	/*LoadBlock();
-	LoadBackGround();
-	LoadMainChar(mainChar);
-	*/
+	//mainChar = new MainCharacter(m_ClientWidth / 2, m_ClientHeight / 2, 0);
+	mainMap->MakeMap();
 
 	return true;
 }
 
-void MainGame::Update(float t)
+
+void MainGame::Update()
 {
 
 	FrameDelay();
