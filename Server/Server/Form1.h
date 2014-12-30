@@ -169,8 +169,6 @@ namespace Server {
 	private: System::Void Start_server_Click(System::Object^  sender, System::EventArgs^  e) {
 				 test->setIP(comboBox1->Text);
 				 test->Start();
-				 comboBox1->Hide();
-				 Start_server->Hide();
 				 IPlabel->Text = test->serverIP();
 				 timer1->Start();
 			 }

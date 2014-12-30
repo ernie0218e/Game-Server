@@ -3,6 +3,7 @@
 #include <Mmsystem.h>
 #include <memory>
 #include <vector>
+#include <string>
 #include "stdafx.h"
 #pragma comment(lib, "Winmm.lib")
 
@@ -13,10 +14,12 @@ MainGame::MainGame()
 }
 
 
-//之後要在此新增一個Game，以及新增Character
+//之後要在此新增一個Game
 bool MainGame::Init()
 {
-	
+	newGame_info = "";
+	game_info = "";
+	newChr_count = 0;
 	mainMap = new Map();
 	//mainChar = new MainCharacter(m_ClientWidth / 2, m_ClientHeight / 2, 0);
 	mainMap->MakeMap();
@@ -29,14 +32,24 @@ void MainGame::Update()
 {
 
 	FrameDelay();
+	clearGame_info();
+	//clearNewGame_info();
+	//CheckNewChr();
 	mainMap->UpdateBombTimer();
 	mainMap->CheckBombExplode();
 	mainMap->UpdateBlastTimer();
 	mainMap->CheckBlastGrow();
-	CheckHit(mainChar);
-	mainChar->IncreaseDamageCount();
-	MoveMainChar(mainChar);
-
+	for(int i = 0;i < vMainChar.size();i++){
+		if(vMainChar[i] != NULL){
+			CheckHit(vMainChar[i]);
+			vMainChar[i]->IncreaseDamageCount();
+			MoveMainChar(vMainChar[i]);
+			setGame_info(vMainChar[i]);
+			//setNewGame_info(vMainChar[i]);
+		}
+	}
+	sGame_info = game_info;
+	
 	// read
 	// send
 	// draw
@@ -79,12 +92,12 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 	double mainMidLeftY = mainY - margin;
 	double mainMidRightX = mainX + scalex*blockSize / 2 + margin;
 	double mainMidRightY = mainY - margin;
-	int status;
-	/*修改ui的部分
-	if (ui->ReadKey())
+	
+	int status = mainChar->getStatus();
+
+	if (status != 0)
 	{
-		status = ui->getStatus();
-		if (status&UI::UP)
+		if (status&UP)
 		{
 			int step = 0;
 			
@@ -96,14 +109,14 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 				step++;
 				mainChar->MoveWithDisplacement(0, -1);
 			}
-			while (step < mainMoveSpeed &&!(status&UI::RIGHT) &&
+			while (step < mainMoveSpeed &&!(status&RIGHT) &&
 				(*blockMap)[(int)(mainTopLeftY - 1) / blockSize][(int)mainTopLeftX / blockSize] == 0 &&
 				(*blockMap)[(int)(mainTopRightY - 1) / blockSize][(int)mainTopRightX / blockSize] !=0)
 			{
 				step++;
 				mainChar->MoveWithDisplacement(-1, 0);
 			}
-			while (step < mainMoveSpeed &&!(status&UI::LEFT) &&
+			while (step < mainMoveSpeed &&!(status&LEFT) &&
 				(*blockMap)[(int)(mainTopLeftY - 1) / blockSize][(int)mainTopLeftX / blockSize] != 0 &&
 				(*blockMap)[(int)(mainTopRightY - 1) / blockSize][(int)mainTopRightX / blockSize] == 0)
 			{
@@ -113,7 +126,7 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 			mainChar->setFacing(MainCharacter::UP);
 			
 		}
-		else if (status&UI::DOWN)
+		else if (status&DOWN)
 		{
 			int step = 0;
 			
@@ -125,14 +138,14 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 				step++;
 				mainChar->MoveWithDisplacement(0, 1);
 			}
-			while (step < mainMoveSpeed &&!(status&UI::RIGHT)&&
+			while (step < mainMoveSpeed &&!(status&RIGHT)&&
 				(*blockMap)[(int)(mainBottomLeftY + 2) / blockSize][(int)mainBottomLeftX / blockSize] == 0 &&
 				(*blockMap)[(int)(mainBottomRightY + 2) / blockSize][(int)mainBottomRightX / blockSize] != 0)
 			{
 				step++;
 				mainChar->MoveWithDisplacement(-1, 0);
 			}
-			while (step < mainMoveSpeed &&!(status&UI::LEFT) &&
+			while (step < mainMoveSpeed &&!(status&LEFT) &&
 				(*blockMap)[(int)(mainBottomLeftY + 2) / blockSize][(int)mainBottomLeftX / blockSize] != 0 &&
 				(*blockMap)[(int)(mainBottomRightY + 2) / blockSize][(int)mainBottomRightX / blockSize] == 0)
 			{
@@ -142,7 +155,7 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 			mainChar->setFacing(MainCharacter::DOWN);
 		}
 
-		else if (status&UI::LEFT)
+		else if (status&LEFT)
 		{
 			int step = 0;
 			while (step<mainMoveSpeed && (mainTopLeftX - 2)>0 &&
@@ -153,14 +166,14 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 				step++;
 				mainChar->MoveWithDisplacement(-1, 0);
 			}
-			while (step < mainMoveSpeed &&!(status&UI::DOWN) &&
+			while (step < mainMoveSpeed &&!(status&DOWN) &&
 				(*blockMap)[(int)mainTopLeftY / blockSize][(int)(mainTopLeftX - 2) / blockSize] == 0 &&
 				(*blockMap)[(int)mainBottomLeftY / blockSize][(int)(mainBottomLeftX - 2) / blockSize] != 0)
 			{
 				step++;
 				mainChar->MoveWithDisplacement(0, -1);
 			}
-			while (step < mainMoveSpeed &&!(status&UI::UP) &&
+			while (step < mainMoveSpeed &&!(status&UP) &&
 				(*blockMap)[(int)mainTopLeftY / blockSize][(int)(mainTopLeftX - 2) / blockSize] != 0 &&
 				(*blockMap)[(int)mainBottomLeftY / blockSize][(int)(mainBottomLeftX - 2) / blockSize] == 0)
 			{
@@ -169,7 +182,7 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 			}
 			mainChar->setFacing(MainCharacter::LEFT);
 		}
-		else if (status&UI::RIGHT)
+		else if (status&RIGHT)
 		{
 			int step = 0;
 		
@@ -181,14 +194,14 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 				step++;
 				mainChar->MoveWithDisplacement(1, 0);
 			}
-			while (step < mainMoveSpeed &&!(status&UI::DOWN) &&
+			while (step < mainMoveSpeed &&!(status&DOWN) &&
 				(*blockMap)[(int)mainTopRightY / blockSize][(int)(mainTopRightX + 2) / blockSize] == 0 &&
 				(*blockMap)[(int)mainBottomRightY / blockSize][(int)(mainBottomRightX + 2) / blockSize] != 0)
 			{
 				step++;
 				mainChar->MoveWithDisplacement(0, -1);
 			}
-			while (step < mainMoveSpeed &&!(status&UI::UP) &&
+			while (step < mainMoveSpeed &&!(status&UP) &&
 				(*blockMap)[(int)mainTopRightY / blockSize][(int)(mainTopRightX + 2) / blockSize] != 0 &&
 				(*blockMap)[(int)mainBottomRightY / blockSize][(int)(mainBottomRightX + 2) / blockSize] == 0)
 			{
@@ -198,12 +211,12 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 
 			mainChar->setFacing(MainCharacter::RIGHT);
 		}
-		if (status&UI::ZK)
+		if (status&ZK)
 		{
 			mainMap->DropBomb(mainChar->getX(), mainChar->getY());
 		}
 
-	}*/
+	}
 }
 
 
@@ -261,5 +274,76 @@ void MainGame::CheckHit(MainCharacter *mainChar)
 		mainChar->Hit();
 	}
 
+}
+
+void MainGame::deleteChar(int d_id)
+{
+	for(int i = 0;i < vMainChar.size();i++)
+		if(vMainChar[i]->getId() == d_id){
+			delete []vMainChar[i];
+			clearNewGame_info(d_id);
+			break;
+		}
+}
+
+MainCharacter* MainGame::MakeNewChar(double x,double y, int id)
+{
+	mainChar = new MainCharacter(x , y, 0, id);
+	vMainChar.push_back(mainChar);
+	setNewGame_info(mainChar);
+	newChr_count++;
+	return mainChar;
+}
+
+int MainGame::getMainChar_size()
+{
+	return vMainChar.size();
+}
+
+void MainGame::setGame_info(MainCharacter *mainChar)
+{
+	game_info += "mch" + ConvertToString(mainChar->getId()) + "," + ConvertToString(mainChar->getX())+
+		"," + ConvertToString(mainChar->getY()) + "," + ConvertToString(mainChar->getGraphCode()) + ")";
+}
+
+void MainGame::setNewGame_info(MainCharacter *)
+{
+	newGame_info += "nch" + ConvertToString(mainChar->getId()) + "," + ConvertToString(mainChar->getX())+
+		"," + ConvertToString(mainChar->getY()) + "," + ConvertToString(mainChar->getGraphCode()) + ")";
+}
+
+void MainGame::clearGame_info()
+{
+	game_info = "";
+}
+
+void MainGame::clearNewGame_info(int id)
+{
+	string f = "nch" + ConvertToString(id);
+	std::size_t found = newGame_info.find(f);
+	if(found != std::string::npos){
+		std::size_t en = newGame_info.find(')',found);
+		if(en != std::string::npos){
+			newGame_info.erase(found, en - found + 1);
+		}
+	}
+}
+
+/*void MainGame::CheckNewChr()
+{
+	int i = vMainChar.size() - 1;
+	while(newChr_count){
+		game_info += "nch" + ConvertToString(vMainChar[i]->getId()) + "," + ConvertToString(vMainChar[i]->getX())+"," +
+			ConvertToString(vMainChar[i]->getY()) + "," + ConvertToString(vMainChar[i]->getGraphCode()) + ")";
+		i--;
+		newChr_count--;
+	}
+}*/
+
+std::string MainGame::ConvertToString(int t) {
+	char buff[2048];
+	sprintf(buff,"%d",t);
+	string data = buff;
+	return data;
 }
 

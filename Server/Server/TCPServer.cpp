@@ -1,7 +1,6 @@
 ﻿#include "StdAfx.h"
 #include "TCPServer.h"
 MainGame *game;
-
 TCPServer::TCPServer(void){
 	IP = gcnew String("127.0.0.1");
 }
@@ -18,12 +17,16 @@ void TCPServer::Start()
 {
 	//******Game Initial************
 	game = new MainGame();
-	game->Init();
-	//******End Game Initial********
-	//******new	a game thread*******
-	this->gameThread = gcnew Thread(gcnew ThreadStart(this, &TCPServer::gameStart));
-	//******End*********************
-	
+	try{		//secret!!
+		game->Init();
+		//******End Game Initial********
+		//******new	a game thread*******
+		this->gameThread = gcnew Thread(gcnew ThreadStart(this, &TCPServer::gameStart));
+		this->gameThread->Start();
+		//******End*********************
+	}catch(Exception ^game_err){
+		
+	}
 	System::Diagnostics::Debug::WriteLine(IP);
 	this->serverIP();
 	this->socketList = gcnew List<Socket^>();
@@ -84,13 +87,14 @@ String^ TCPServer::serverCount()
 
 void TCPServer::HandleClientComm(Object ^client){
 	Socket ^tcpClient = (Socket^ )client;
-	tcpClient->ReceiveTimeout = 1000;
+	tcpClient->ReceiveTimeout = 500;
 	array <unsigned char> ^myBytes;
 	array <unsigned char> ^myBufferBytes;
 	String ^receivedata = nullptr;
+	MainCharacter *mainchr;
 	int dataLength;
-	
-	//****************send map*****************
+	int ID;
+	//****************get map*****************
 	char ***temp_map;
 	String ^send_map;
 	temp_map = game->mainMap->getBlockMap();
@@ -99,61 +103,87 @@ void TCPServer::HandleClientComm(Object ^client){
 		//myBytes = Encoding::Unicode->GetBytes("Welcome to My Server !!!!!\n");
 		//tcpClient->Send(myBytes);
 		myBufferBytes = gcnew array <unsigned char>(1024);
+		//************send map******************
 		myBytes = gcnew array <unsigned char>((game->mainMap->getBlockY())*(game->mainMap->getBlockX()));
 		dataLength  = tcpClient->Receive(myBufferBytes);
 		receivedata += Encoding::ASCII->GetString(myBufferBytes, 0, dataLength);
-		System::Diagnostics::Debug::WriteLine(receivedata);
 		if(receivedata=="iwanttoplay"){
 			for(int i = 0;i < game->mainMap->getBlockY();i++)
 				for(int j = 0;j < game->mainMap->getBlockX();j++){
 					myBytes[i*game->mainMap->getBlockX()+j] = (*temp_map)[i][j];
-					System::Diagnostics::Debug::WriteLine(Convert::ToString(myBytes[i*game->mainMap->getBlockY()+j]));
+					//System::Diagnostics::Debug::WriteLine(Convert::ToString(myBytes[i*game->mainMap->getBlockY()+j]));
 				}
 			//System::Diagnostics::Debug::WriteLine(Convert::ToString(myBytes->Length));
 			tcpClient->Send(myBytes);
-			System::Diagnostics::Debug::WriteLine("Test");
 		}
 		receivedata = nullptr;
-	//**************end of send map**********
-		
+		//**************end of send map**********
+		//**************receive buffer***********
+		try{
+			dataLength  = tcpClient->Receive(myBufferBytes);
+			receivedata += Encoding::ASCII->GetString(myBufferBytes, 0, dataLength);
+		}catch(Exception ^rec){
+
+		}
+		if(receivedata != nullptr){
+		//**************new character************
+			ID = game->getMainChar_size();
+			mainchr = game->MakeNewChar(1000, 500, ID);
+			System::Diagnostics::Debug::WriteLine(gcnew String(game->newGame_info.c_str()));
+			myBytes = Encoding::ASCII->GetBytes(gcnew String(game->newGame_info.c_str())+"\0");
+			tcpClient->Send(myBytes);
+		//**************end of new character******
+		}
+		receivedata = nullptr;
 		while(true){
 			try{
 				try{
 					do{
 						myBufferBytes = gcnew array <unsigned char>(1024);
 						dataLength  = tcpClient->Receive(myBufferBytes);
-					
+						
 						if (dataLength > 0){
-							receivedata += Encoding::Unicode->GetString(myBufferBytes, 0, dataLength);
+							receivedata += Encoding::ASCII->GetString(myBufferBytes, 0, dataLength);
 						}
 					}while(tcpClient->Available);
 				}catch(Exception ^recv_err){
+					System::Diagnostics::Debug::WriteLine("here");
 					break;
 				}
+				
 				//do some work
 				if (receivedata != nullptr){
-					myBytes = Encoding::Unicode->GetBytes(receivedata);
+					//System::Diagnostics::Debug::WriteLine(receivedata);
+					mainchr->setStatus(Convert::ToInt32(receivedata));
+					System::Diagnostics::Debug::WriteLine(gcnew String(game->sGame_info.c_str()));
+					myBytes = Encoding::ASCII->GetBytes(gcnew String(game->newGame_info.c_str()) + gcnew String(game->sGame_info.c_str())+"\0");
 					for(int i = 0;i < socketList->Count;i++){
-						if(tcpClient != socketList[i]){
-							try{
-								socketList[i]->Send(myBytes);
-							}
-							catch(Exception ^send_err){
-
-							}
+						try{
+							socketList[i]->Send(myBytes);
+						}
+						catch(Exception ^send_err){
+							break;
 						}
 					}
 				}
 				receivedata = nullptr;
 			}
 			catch(Exception ^ee){
+				
 				break;
 			}
 		}
 	}
+	game->deleteChar(mainchr->getId());
 	tcpClient->Close();
 	socketList->Remove(tcpClient);
 	connection_count--;
 }
 
-
+void TCPServer::MarshalString ( String ^ s, string& os ) {
+	using namespace Runtime::InteropServices;
+	const char* chars = 
+		(const char*)(Marshal::StringToHGlobalAnsi(s)).ToPointer();
+	os = chars;
+	Marshal::FreeHGlobal(IntPtr((void*)chars));
+}

@@ -2,8 +2,9 @@
 #include <math.h>
 #include "Sprite.h"
 #include "stdafx.h"
-MainCharacter::MainCharacter(double x, double y, int graphCode)
+MainCharacter::MainCharacter(double x, double y, int graphCode, int id)
 {
+	this->id = id;
 	this->graphCode = graphCode;
 	damageImmuneCount = 0;
 	damageImmuneSecond = 700;
@@ -92,5 +93,21 @@ int MainCharacter::getFacing()
 {
 	return facing;
 }
+
+int MainCharacter::getId()
+{
+	return id;
+}
+
+int MainCharacter::getStatus()
+{
+	return status;
+}
+
+void MainCharacter::setStatus(int s)
+{
+	status = s;
+}
+
 
 

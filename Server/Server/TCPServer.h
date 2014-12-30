@@ -22,6 +22,7 @@ private:
 	void gameStart(void);
 	void ListenForClients(void);
 	void HandleClientComm(Object^);
+	void MarshalString(String ^, string&);
 public:
 	TCPServer();
 	~TCPServer();

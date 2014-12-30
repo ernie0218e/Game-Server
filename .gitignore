@@ -183,6 +183,10 @@ $RECYCLE.BIN/
 # Mac crap
 .DS_Store
 
+# zip file
+*.zip
+*.rar
+*.7z
 
 #############
 ## Python
