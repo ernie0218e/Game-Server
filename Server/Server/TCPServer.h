@@ -10,14 +10,16 @@ using namespace std;
 ref class TCPServer
 {
 private:
+	MainGame *game;
 	String^ IP;
+	String^ err_msg;
+	String^ msg;
 	array <IPAddress^> ^myip;
 	TcpListener^ tcpListener;
 	Thread^ listenThread;
 	Thread^ gameThread;
-	/*List<String^>^ recieveData;
-	List<String^>^ sendData;*/
-	List<Socket^>^ socketList;
+	
+	//List<Socket^>^ socketList;
 	int connection_count;
 	void gameStart(void);
 	void ListenForClients(void);
@@ -26,10 +28,13 @@ private:
 public:
 	TCPServer();
 	~TCPServer();
-	void Start();
+	int Start();
+	void Stop();
 	void setIP(String ^);
 	String^ serverIP();
 	String^ serverCount();
 	String^ getIParray();
+	String^ getError();
+	String^ getMessage();
 };
 

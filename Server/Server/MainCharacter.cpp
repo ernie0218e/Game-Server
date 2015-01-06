@@ -1,9 +1,11 @@
 #include "MainCharacter.h"
 #include <math.h>
-#include "Sprite.h"
 #include "stdafx.h"
 MainCharacter::MainCharacter(double x, double y, int graphCode, int id)
 {
+	command_flag = 0;
+	newChar_id = 0;
+	delChar_id = 0;
 	this->id = id;
 	this->graphCode = graphCode;
 	damageImmuneCount = 0;
@@ -109,5 +111,48 @@ void MainCharacter::setStatus(int s)
 	status = s;
 }
 
+void MainCharacter::setCmdFlag(int f)
+{
+	command_flag |= f;
+}
 
+void MainCharacter::setCmdFlag(int f, int _id)
+{
+	command_flag |= f;
+	if(f == 0x00000002)
+		newChar_id = _id;
+	else if(f == 0x00000008)
+		delChar_id = _id;
+}
+
+int MainCharacter::getCmdFlag()
+{
+	return command_flag;
+}
+
+void MainCharacter::clearCmdFlag()
+{
+	command_flag &= 0x00000000;
+}
+
+
+int MainCharacter::getNewCharID()
+{
+	return newChar_id;
+}
+
+void MainCharacter::clearNewCharID()
+{
+	newChar_id = 0;
+}
+
+int MainCharacter::getDelCharID()
+{
+	return delChar_id;
+}
+
+void MainCharacter::clearDelCharID()
+{
+	delChar_id = 0;
+}
 

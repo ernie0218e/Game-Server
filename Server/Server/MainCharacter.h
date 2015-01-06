@@ -10,6 +10,10 @@ class MainCharacter	: public Object
 	double step;
 	double moveSpeed;
 
+	int command_flag;
+	int newChar_id;
+	int delChar_id;
+
 	int id;
 	int status;
 	int facing;
@@ -27,6 +31,14 @@ public:
 	int getStatus();
 	int getFacing();
 	int getGraphCode();
+	int getCmdFlag();
+	int getNewCharID();
+	int getDelCharID();
+	void setCmdFlag(int);
+	void setCmdFlag(int, int);
+	void clearNewCharID();
+	void clearDelCharID();
+	void clearCmdFlag();
 	void IncreaseDamageCount();
 	void setStatus(int);
 	void setFacing(int f);

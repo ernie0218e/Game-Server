@@ -1,4 +1,4 @@
-﻿#include "MainGame.h"
+#include "MainGame.h"
 #include <windows.h>
 #include <Mmsystem.h>
 #include <memory>
@@ -21,7 +21,6 @@ bool MainGame::Init()
 	game_info = "";
 	newChr_count = 0;
 	mainMap = new Map();
-	//mainChar = new MainCharacter(m_ClientWidth / 2, m_ClientHeight / 2, 0);
 	mainMap->MakeMap();
 
 	return true;
@@ -97,6 +96,7 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 
 	if (status != 0)
 	{
+		mainChar->setCmdFlag(MOVE_CHAR);
 		if (status&UP)
 		{
 			int step = 0;
@@ -278,35 +278,49 @@ void MainGame::CheckHit(MainCharacter *mainChar)
 
 void MainGame::deleteChar(int d_id)
 {
-	for(int i = 0;i < vMainChar.size();i++)
-		if(vMainChar[i]->getId() == d_id){
-			delete []vMainChar[i];
-			clearNewGame_info(d_id);
-			break;
+	for(int i = 0;i < vMainChar.size();i++){
+		if(vMainChar[i] != NULL){
+			if(vMainChar[i]->getId() == d_id){
+				delete []vMainChar[i];
+				vMainChar[i] = NULL;
+				clearNewGame_info(d_id);
+			}else{
+				vMainChar[i]->setCmdFlag(DEL_CHAR, d_id);
+			}
 		}
+	}
 }
 
 MainCharacter* MainGame::MakeNewChar(double x,double y, int id)
 {
+	MainCharacter *mainChar;
 	mainChar = new MainCharacter(x , y, 0, id);
 	vMainChar.push_back(mainChar);
+	
+	mainChar->setCmdFlag(NEW_ALL_CHAR);
+	for(int i = 0;i < vMainChar.size();i++){
+		if(vMainChar[i] != NULL){
+			if(vMainChar[i] != mainChar)
+				vMainChar[i]->setCmdFlag(NEW_CHAR, mainChar->getId());
+		}
+	}
+
 	setNewGame_info(mainChar);
-	newChr_count++;
 	return mainChar;
 }
 
-int MainGame::getMainChar_size()
+int MainGame::generateID()
 {
-	return vMainChar.size();
+	return vMainChar.size()+1;
 }
 
 void MainGame::setGame_info(MainCharacter *mainChar)
 {
-	game_info += "mch" + ConvertToString(mainChar->getId()) + "," + ConvertToString(mainChar->getX())+
+	game_info += "mkl" + ConvertToString(mainChar->getId()) + "," + ConvertToString(mainChar->getX())+
 		"," + ConvertToString(mainChar->getY()) + "," + ConvertToString(mainChar->getGraphCode()) + ")";
 }
 
-void MainGame::setNewGame_info(MainCharacter *)
+void MainGame::setNewGame_info(MainCharacter *mainChar)
 {
 	newGame_info += "nch" + ConvertToString(mainChar->getId()) + "," + ConvertToString(mainChar->getX())+
 		"," + ConvertToString(mainChar->getY()) + "," + ConvertToString(mainChar->getGraphCode()) + ")";
@@ -325,20 +339,11 @@ void MainGame::clearNewGame_info(int id)
 		std::size_t en = newGame_info.find(')',found);
 		if(en != std::string::npos){
 			newGame_info.erase(found, en - found + 1);
-		}
+		}else
+			newGame_info.erase(found);
 	}
 }
 
-/*void MainGame::CheckNewChr()
-{
-	int i = vMainChar.size() - 1;
-	while(newChr_count){
-		game_info += "nch" + ConvertToString(vMainChar[i]->getId()) + "," + ConvertToString(vMainChar[i]->getX())+"," +
-			ConvertToString(vMainChar[i]->getY()) + "," + ConvertToString(vMainChar[i]->getGraphCode()) + ")";
-		i--;
-		newChr_count--;
-	}
-}*/
 
 std::string MainGame::ConvertToString(int t) {
 	char buff[2048];
@@ -347,3 +352,53 @@ std::string MainGame::ConvertToString(int t) {
 	return data;
 }
 
+
+string MainGame::getCommand(MainCharacter *mainChar){
+	string com = "";
+	int i, flag;
+	flag = mainChar->getCmdFlag();
+	if(flag != 0){
+		if(flag & MOVE_CHAR){
+			for(i = 0;i < vMainChar.size();i++){
+				if(vMainChar[i] != NULL){
+					com += "mkl" + ConvertToString(vMainChar[i]->getId()) + "," + ConvertToString(vMainChar[i]->getX())+
+					"," + ConvertToString(vMainChar[i]->getY()) + "," + ConvertToString(vMainChar[i]->getGraphCode()) + ")";
+				}
+			}
+		}
+		if(flag & NEW_CHAR){
+			for(i = 0;i < vMainChar.size();i++){
+				if(vMainChar[i] != NULL){
+					if(vMainChar[i]->getId() == mainChar->getNewCharID()){
+						com += "nch" + ConvertToString(vMainChar[i]->getId()) + "," + ConvertToString(vMainChar[i]->getX())+
+						"," + ConvertToString(vMainChar[i]->getY()) + "," + ConvertToString(vMainChar[i]->getGraphCode()) + ")";
+						mainChar->clearNewCharID();
+						break;
+					}
+				}
+			}
+		}
+		if(flag & NEW_ALL_CHAR){
+			for(i = 0;i < vMainChar.size();i++){
+				if(vMainChar[i] != NULL){
+					com += "nch" + ConvertToString(vMainChar[i]->getId()) + "," + ConvertToString(vMainChar[i]->getX())+
+					"," + ConvertToString(vMainChar[i]->getY()) + "," + ConvertToString(vMainChar[i]->getGraphCode()) + ")";
+				}
+			}
+		}
+		if(flag & DEL_CHAR){
+			for(i = 0;i < vMainChar.size();i++){
+				if(vMainChar[i] != NULL){
+					if(vMainChar[i]->getId() == mainChar->getDelCharID()){
+						com += "del" + ConvertToString(vMainChar[i]->getId())+ ")";
+						mainChar->clearDelCharID();
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	mainChar->clearCmdFlag();
+	return com;
+}

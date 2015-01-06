@@ -3,24 +3,27 @@
 #include "Blast.h"
 #include <Mmsystem.h>
 #include "stdafx.h"
+#include <vector>
 #pragma comment(lib, "Winmm.lib")
 
 Map::Map() : blockX(25), blockY(17), blockSize(45)
 {
-
-
+	int i;
+	int r;
+	
 	blockMap = new char*[blockX];
 	bombMap = new char*[blockX];
 	blastMap = new int*[blockX];
-	for (int i = 0; i < blockX; i++)
+
+	for (i = 0; i < blockX; i++)
 	{
 		blockMap[i] = new char[blockY];
 		bombMap[i] = new char[blockY];
 		blastMap[i] = new int[blockY];
 	}
 
-	for (int i = 0 ; i < blockY ; i++)
-		for (int r = 0; r < blockX; r++)
+	for (i = 0 ; i < blockY ; i++)
+		for (r = 0; r < blockX; r++)
 		{		
 			bombMap[i][r] = 0;
 			blastMap[i][r] = 99999;
@@ -44,25 +47,31 @@ Map::~Map()
 
 void Map::MakeMap()
 {
-	//10~19 ¬µ¼u
-	//100~200 ¤è¶ô
-	//200~250 ¹D¨ã
+	//10~19 ç‚¸å½ˆ
+	//100~200 æ–¹å¡Š
+	//200~250 é“å…·
+	int i, r;
+
 	const double scale = 1.0;
-	for (int i = 0; i < blockY; i++)
-		for (int r = 0; r < blockX; r++)
+	for (i = 0; i < blockY; i++){
+		for (r = 0; r < blockX; r++)
 		{
 
 			if (r == 0 || i == 0 || i == blockY - 1 || r == blockX - 1)
 				blockMap[i][r] = 100;
 			else if (r % 2 == 0 && i % 2 == 0)
-				blockMap[i][r] = 11;
+				blockMap[i][r] = 100;
 			else 
 				blockMap[i][r] = 0;
-	
+			
 		}
-		for (int i = 0; i < blockY; i++)
-			for (int r = 0; r < blockX; r++)
-				vBlock.push_back(new Block(scale*blockSize*r + 0.5*blockSize, scale*blockSize*i + 0.5*blockSize, blockMap[i][r], r, i));
+	}
+	for (i = 0; i < blockY; i++){
+		for (r = 0; r < blockX; r++){
+			Block *b = new Block(scale*blockSize*r + 0.5*blockSize, scale*blockSize*i + 0.5*blockSize, blockMap[i][r], r, i);
+			vBlock.push_back(b);
+		}
+	}
 }
 
 char *** Map::getBlockMap()

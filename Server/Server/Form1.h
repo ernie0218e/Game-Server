@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <Windows.h>
 #include "TCPServer.h"
 namespace Server {
@@ -9,9 +9,9 @@ namespace Server {
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
-
+	using namespace System::Text;
 	/// <summary>
-	/// Form1 µÄÕªÒª
+	/// Form1 è…”æ™¡çŒ
 	/// </summary>
 	public ref class Form1 : public System::Windows::Forms::Form
 	{
@@ -32,13 +32,13 @@ namespace Server {
 			}
 			comboBox1->SelectedIndex = 0;
 			//
-			//TODO: ÔÚ´Ë¼ÓÈë½¨?º¯Ê½³ÌÊ½´a
+			//TODO: å©“æ£®æ¨“ï µè†˜?æ»²å®’æœ€å®’å¾¨
 			//
 		}
 
 	protected:
 		/// <summary>
-		/// Çå³ıÈÎºÎÊ¹ÓÃÖĞµÄÙYÔ´¡£
+		/// ï’å£ºï ˜ç¡å¦èššç¬¢è…”æƒåŸ­ï¹
 		/// </summary>
 		~Form1()
 		{
@@ -55,7 +55,7 @@ namespace Server {
 
 	private:
 		/// <summary>
-		/// ÔO?¹¤¾ßËùĞèµÄ?”µ¡£
+		/// å?é¦±æ’¿å€å‰’è…”?îœ’ï¹
 		/// </summary>
 
 	private: System::Windows::Forms::Button^  Start_server;
@@ -64,11 +64,18 @@ namespace Server {
 	private: System::Windows::Forms::Label^  label1;
 	private: System::Windows::Forms::Label^  label2;
 	private: System::Windows::Forms::ComboBox^  comboBox1;
+	private: System::Windows::Forms::RichTextBox^  Log;
+	private: System::Windows::Forms::Button^  Stop_server;
+
+
+
 	private: TCPServer ^test;
+	private: System::String^ err_msg;
+	private: System::String^ msg;
 #pragma region Windows Form Designer generated code
 		/// <summary>
-		/// ´ËéÔO?¹¤¾ßÖ§Ô®ËùĞèµÄ·½·¨ - ?ÎğÊ¹ÓÃ³ÌÊ½´a??Æ÷
-		/// ĞŞ¸Äß@?·½·¨µÄƒÈÈİ¡£
+		/// æ£®îµ¨å?é¦±æ’¿ç›“å ”å€å‰’è…”æºæ¥Š - ?æ˜¦å¦èššæœ€å®’å¾¨??ïœ‡
+		/// å…šèœŠç¨›?æºæ¥Šè…”ï˜ï §ï¹
 		/// </summary>
 		void InitializeComponent(void)
 		{
@@ -80,11 +87,15 @@ namespace Server {
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->comboBox1 = (gcnew System::Windows::Forms::ComboBox());
+			this->Log = (gcnew System::Windows::Forms::RichTextBox());
+			this->Stop_server = (gcnew System::Windows::Forms::Button());
 			this->SuspendLayout();
 			// 
 			// IPlabel
 			// 
 			this->IPlabel->AutoSize = true;
+			this->IPlabel->Font = (gcnew System::Drawing::Font(L"æ–°ç´°æ˜é«”", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
 			this->IPlabel->Location = System::Drawing::Point(12, 138);
 			this->IPlabel->Name = L"IPlabel";
 			this->IPlabel->Size = System::Drawing::Size(14, 15);
@@ -93,21 +104,21 @@ namespace Server {
 			// 
 			// Start_server
 			// 
-			this->Start_server->Font = (gcnew System::Drawing::Font(L"·L³n¥¿¶ÂÅé", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
-				static_cast<System::Byte>(136)));
+			this->Start_server->Font = (gcnew System::Drawing::Font(L"å¾®è»Ÿæ­£é»‘é«”", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
 			this->Start_server->Location = System::Drawing::Point(12, 68);
 			this->Start_server->Name = L"Start_server";
-			this->Start_server->Size = System::Drawing::Size(103, 32);
+			this->Start_server->Size = System::Drawing::Size(99, 29);
 			this->Start_server->TabIndex = 1;
-			this->Start_server->Text = L"Sever Start";
+			this->Start_server->Text = L"Start";
 			this->Start_server->UseVisualStyleBackColor = true;
 			this->Start_server->Click += gcnew System::EventHandler(this, &Form1::Start_server_Click);
 			// 
 			// connection_count
 			// 
 			this->connection_count->AutoSize = true;
-			this->connection_count->Font = (gcnew System::Drawing::Font(L"·L³n¥¿¶ÂÅé", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
-				static_cast<System::Byte>(136)));
+			this->connection_count->Font = (gcnew System::Drawing::Font(L"å¾®è»Ÿæ­£é»‘é«”", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
 			this->connection_count->Location = System::Drawing::Point(157, 162);
 			this->connection_count->Name = L"connection_count";
 			this->connection_count->Size = System::Drawing::Size(20, 22);
@@ -116,13 +127,14 @@ namespace Server {
 			// 
 			// timer1
 			// 
+			this->timer1->Interval = 10;
 			this->timer1->Tick += gcnew System::EventHandler(this, &Form1::timer1_Tick);
 			// 
 			// label1
 			// 
 			this->label1->AutoSize = true;
-			this->label1->Font = (gcnew System::Drawing::Font(L"·L³n¥¿¶ÂÅé", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
-				static_cast<System::Byte>(136)));
+			this->label1->Font = (gcnew System::Drawing::Font(L"å¾®è»Ÿæ­£é»‘é«”", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
 			this->label1->Location = System::Drawing::Point(8, 162);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(132, 22);
@@ -132,8 +144,8 @@ namespace Server {
 			// label2
 			// 
 			this->label2->AutoSize = true;
-			this->label2->Font = (gcnew System::Drawing::Font(L"·L³n¥¿¶ÂÅé", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
-				static_cast<System::Byte>(136)));
+			this->label2->Font = (gcnew System::Drawing::Font(L"å¾®è»Ÿæ­£é»‘é«”", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
 			this->label2->Location = System::Drawing::Point(8, 116);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(92, 22);
@@ -142,17 +154,43 @@ namespace Server {
 			// 
 			// comboBox1
 			// 
+			this->comboBox1->Font = (gcnew System::Drawing::Font(L"æ–°ç´°æ˜é«”", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
 			this->comboBox1->FormattingEnabled = true;
 			this->comboBox1->Location = System::Drawing::Point(12, 24);
 			this->comboBox1->Name = L"comboBox1";
 			this->comboBox1->Size = System::Drawing::Size(213, 23);
 			this->comboBox1->TabIndex = 5;
 			// 
+			// Log
+			// 
+			this->Log->Location = System::Drawing::Point(251, 24);
+			this->Log->Name = L"Log";
+			this->Log->ReadOnly = true;
+			this->Log->ScrollBars = System::Windows::Forms::RichTextBoxScrollBars::ForcedBoth;
+			this->Log->Size = System::Drawing::Size(301, 392);
+			this->Log->TabIndex = 6;
+			this->Log->Text = L"";
+			// 
+			// Stop_server
+			// 
+			this->Stop_server->Font = (gcnew System::Drawing::Font(L"å¾®è»Ÿæ­£é»‘é«”", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
+			this->Stop_server->Location = System::Drawing::Point(127, 68);
+			this->Stop_server->Name = L"Stop_server";
+			this->Stop_server->Size = System::Drawing::Size(98, 29);
+			this->Stop_server->TabIndex = 7;
+			this->Stop_server->Text = L"Stop";
+			this->Stop_server->UseVisualStyleBackColor = true;
+			this->Stop_server->Click += gcnew System::EventHandler(this, &Form1::Stop_server_Click);
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 15);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(564, 428);
+			this->Controls->Add(this->Stop_server);
+			this->Controls->Add(this->Log);
 			this->Controls->Add(this->comboBox1);
 			this->Controls->Add(this->label2);
 			this->Controls->Add(this->label1);
@@ -174,7 +212,20 @@ namespace Server {
 			 }
 	private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
 				 connection_count->Text = test->serverCount();
+				 err_msg = test->getError();
+				 msg = test->getMessage();
+				 if(err_msg != nullptr){
+					Log->Text += err_msg;
+				 }
+				 if(msg != nullptr){
+					 Log->Text += msg;
+				 }
 			 }
-	};
+	private: System::Void Stop_server_Click(System::Object^  sender, System::EventArgs^  e) {
+				 test->Stop();
+				 IPlabel->Text = "0";
+				 timer1->Stop();
+			 }
+};
 }
 
