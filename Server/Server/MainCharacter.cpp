@@ -1,11 +1,15 @@
 #include "MainCharacter.h"
 #include <math.h>
 #include "stdafx.h"
-MainCharacter::MainCharacter(double x, double y, int graphCode, int id)
+#include <string>
+MainCharacter::MainCharacter(double x, double y, int graphCode, int id, string name)
 {
 	command_flag = 0;
 	newChar_id = 0;
 	delChar_id = 0;
+	
+	charName = name;
+	lastTime = timeGetTime();
 	this->id = id;
 	this->graphCode = graphCode;
 	damageImmuneCount = 0;
@@ -16,7 +20,6 @@ MainCharacter::MainCharacter(double x, double y, int graphCode, int id)
 	moveSpeed = 3;
 	facing = DOWN;
 }
-
 
 
 MainCharacter::~MainCharacter()
@@ -48,18 +51,20 @@ void MainCharacter::setFacing(int f)
 	facing = f;
 }
 
-void MainCharacter::Hit()
+bool MainCharacter::Hit()
 {
 	if (damageImmuneCount == 0)
 	{
 		hp -= 10;
 		damageImmuneCount = 1;
+		return true;
 	}
+	return false;
 }
 
 void MainCharacter::IncreaseDamageCount()
 {
-	static int lastTime = timeGetTime();
+	
 	static int currentTime;
 	currentTime = timeGetTime();
 	int DTime = currentTime - lastTime;
@@ -154,5 +159,41 @@ int MainCharacter::getDelCharID()
 void MainCharacter::clearDelCharID()
 {
 	delChar_id = 0;
+}
+
+std::string MainCharacter::getCharName()
+{
+	return charName;
+}
+
+int MainCharacter::getBombX()
+{
+	return bomb_x;
+}
+
+int MainCharacter::getBombY()
+{
+	return bomb_y;
+}
+
+void MainCharacter::setBomb(int x, int y)
+{
+	bomb_x = x;
+	bomb_y = y;
+}
+
+void MainCharacter::clearBomb()
+{
+	bomb_x = bomb_y = 0;
+}
+
+void MainCharacter::setHitID(int _id)
+{
+	hit_id = _id;
+}
+
+int MainCharacter::getHitID()
+{
+	return hit_id;
 }
 

@@ -17,8 +17,6 @@ MainGame::MainGame()
 //之後要在此新增一個Game
 bool MainGame::Init()
 {
-	newGame_info = "";
-	game_info = "";
 	newChr_count = 0;
 	mainMap = new Map();
 	mainMap->MakeMap();
@@ -29,11 +27,7 @@ bool MainGame::Init()
 
 void MainGame::Update()
 {
-
 	FrameDelay();
-	clearGame_info();
-	//clearNewGame_info();
-	//CheckNewChr();
 	mainMap->UpdateBombTimer();
 	mainMap->CheckBombExplode();
 	mainMap->UpdateBlastTimer();
@@ -41,13 +35,14 @@ void MainGame::Update()
 	for(int i = 0;i < vMainChar.size();i++){
 		if(vMainChar[i] != NULL){
 			CheckHit(vMainChar[i]);
+		}
+		if(vMainChar[i] != NULL){
 			vMainChar[i]->IncreaseDamageCount();
+		}
+		if(vMainChar[i] != NULL){
 			MoveMainChar(vMainChar[i]);
-			setGame_info(vMainChar[i]);
-			//setNewGame_info(vMainChar[i]);
 		}
 	}
-	sGame_info = game_info;
 	
 	// read
 	// send
@@ -57,7 +52,7 @@ void MainGame::Update()
 
 MainGame::~MainGame()
 {
-
+	
 }
 
 //修改成多人版本
@@ -94,9 +89,10 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 	
 	int status = mainChar->getStatus();
 
+	mainChar->setCmdFlag(MOVE_CHAR);
 	if (status != 0)
 	{
-		mainChar->setCmdFlag(MOVE_CHAR);
+		
 		if (status&UP)
 		{
 			int step = 0;
@@ -213,7 +209,17 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 		}
 		if (status&ZK)
 		{
-			mainMap->DropBomb(mainChar->getX(), mainChar->getY());
+			int _x, _y;
+			_x = mainChar->getX();
+			_y = mainChar->getY();
+			if(mainMap->DropBomb(_x, _y)){
+				for(int i = 0;i < vMainChar.size();i++){
+					if(vMainChar[i] != NULL){
+						vMainChar[i]->setCmdFlag(NEW_BOMB);
+						vMainChar[i]->setBomb(_x, _y);
+					}
+				}
+			}
 		}
 
 	}
@@ -271,7 +277,14 @@ void MainGame::CheckHit(MainCharacter *mainChar)
 		(*(blastMap))[mainBottomLeftY][mainBottomLeftX] != 99999 ||
 		(*(blastMap))[mainBottomRightY][mainBottomRightX] != 99999)
 	{
-		mainChar->Hit();
+		if(mainChar->Hit()){
+			for(int i = 0;i < vMainChar.size();i++){
+				if(vMainChar[i] != NULL){
+					vMainChar[i]->setCmdFlag(GET_HIT);
+					vMainChar[i]->setHitID(mainChar->getId());
+				}
+			}
+		}
 	}
 
 }
@@ -281,9 +294,8 @@ void MainGame::deleteChar(int d_id)
 	for(int i = 0;i < vMainChar.size();i++){
 		if(vMainChar[i] != NULL){
 			if(vMainChar[i]->getId() == d_id){
-				delete []vMainChar[i];
+				delete vMainChar[i];
 				vMainChar[i] = NULL;
-				clearNewGame_info(d_id);
 			}else{
 				vMainChar[i]->setCmdFlag(DEL_CHAR, d_id);
 			}
@@ -291,10 +303,10 @@ void MainGame::deleteChar(int d_id)
 	}
 }
 
-MainCharacter* MainGame::MakeNewChar(double x,double y, int id)
+MainCharacter* MainGame::MakeNewChar(double x,double y, int id, string name)
 {
 	MainCharacter *mainChar;
-	mainChar = new MainCharacter(x , y, 0, id);
+	mainChar = new MainCharacter(x , y, 0, id, name);
 	vMainChar.push_back(mainChar);
 	
 	mainChar->setCmdFlag(NEW_ALL_CHAR);
@@ -305,43 +317,12 @@ MainCharacter* MainGame::MakeNewChar(double x,double y, int id)
 		}
 	}
 
-	setNewGame_info(mainChar);
 	return mainChar;
 }
 
 int MainGame::generateID()
 {
 	return vMainChar.size()+1;
-}
-
-void MainGame::setGame_info(MainCharacter *mainChar)
-{
-	game_info += "mkl" + ConvertToString(mainChar->getId()) + "," + ConvertToString(mainChar->getX())+
-		"," + ConvertToString(mainChar->getY()) + "," + ConvertToString(mainChar->getGraphCode()) + ")";
-}
-
-void MainGame::setNewGame_info(MainCharacter *mainChar)
-{
-	newGame_info += "nch" + ConvertToString(mainChar->getId()) + "," + ConvertToString(mainChar->getX())+
-		"," + ConvertToString(mainChar->getY()) + "," + ConvertToString(mainChar->getGraphCode()) + ")";
-}
-
-void MainGame::clearGame_info()
-{
-	game_info = "";
-}
-
-void MainGame::clearNewGame_info(int id)
-{
-	string f = "nch" + ConvertToString(id);
-	std::size_t found = newGame_info.find(f);
-	if(found != std::string::npos){
-		std::size_t en = newGame_info.find(')',found);
-		if(en != std::string::npos){
-			newGame_info.erase(found, en - found + 1);
-		}else
-			newGame_info.erase(found);
-	}
 }
 
 
@@ -361,7 +342,7 @@ string MainGame::getCommand(MainCharacter *mainChar){
 		if(flag & MOVE_CHAR){
 			for(i = 0;i < vMainChar.size();i++){
 				if(vMainChar[i] != NULL){
-					com += "mkl" + ConvertToString(vMainChar[i]->getId()) + "," + ConvertToString(vMainChar[i]->getX())+
+					com += "mch" + ConvertToString(vMainChar[i]->getId()) + "," + ConvertToString(vMainChar[i]->getX())+
 					"," + ConvertToString(vMainChar[i]->getY()) + "," + ConvertToString(vMainChar[i]->getGraphCode()) + ")";
 				}
 			}
@@ -371,7 +352,8 @@ string MainGame::getCommand(MainCharacter *mainChar){
 				if(vMainChar[i] != NULL){
 					if(vMainChar[i]->getId() == mainChar->getNewCharID()){
 						com += "nch" + ConvertToString(vMainChar[i]->getId()) + "," + ConvertToString(vMainChar[i]->getX())+
-						"," + ConvertToString(vMainChar[i]->getY()) + "," + ConvertToString(vMainChar[i]->getGraphCode()) + ")";
+						"," + ConvertToString(vMainChar[i]->getY()) + "," + ConvertToString(vMainChar[i]->getGraphCode()) + ","
+						+ vMainChar[i]->getCharName() + ")";
 						mainChar->clearNewCharID();
 						break;
 					}
@@ -382,7 +364,8 @@ string MainGame::getCommand(MainCharacter *mainChar){
 			for(i = 0;i < vMainChar.size();i++){
 				if(vMainChar[i] != NULL){
 					com += "nch" + ConvertToString(vMainChar[i]->getId()) + "," + ConvertToString(vMainChar[i]->getX())+
-					"," + ConvertToString(vMainChar[i]->getY()) + "," + ConvertToString(vMainChar[i]->getGraphCode()) + ")";
+					"," + ConvertToString(vMainChar[i]->getY()) + "," + ConvertToString(vMainChar[i]->getGraphCode()) + "," +
+					vMainChar[i]->getCharName() + ")";
 				}
 			}
 		}
@@ -396,6 +379,13 @@ string MainGame::getCommand(MainCharacter *mainChar){
 					}
 				}
 			}
+		}
+		if(flag & NEW_BOMB){
+			com += "dpb" + ConvertToString(mainChar->getBombX()) + "," +ConvertToString(mainChar->getBombY())
+			+")";
+		}
+		if(flag & GET_HIT){
+			com += "hit" + ConvertToString(mainChar->getHitID())+")";	//hit ID needs more!!
 		}
 	}
 

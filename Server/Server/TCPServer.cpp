@@ -113,9 +113,13 @@ String^ TCPServer::serverCount()
 void TCPServer::HandleClientComm(Object ^client){
 	Socket ^tcpClient = (Socket^ )client;
 	tcpClient->ReceiveTimeout = 500;
+	tcpClient->SendBufferSize = 1024;
+	tcpClient->ReceiveBufferSize = 1024;
 	array <unsigned char> ^myBytes;
 	array <unsigned char> ^myBufferBytes;
 	String ^receivedata = nullptr;
+	String ^charName = nullptr;
+	string char_Name = "";
 	MainCharacter *mainchr;
 	int dataLength;
 	int ID;
@@ -133,13 +137,13 @@ void TCPServer::HandleClientComm(Object ^client){
 		dataLength  = tcpClient->Receive(myBufferBytes);
 		receivedata += Encoding::ASCII->GetString(myBufferBytes, 0, dataLength);
 		
-		if(receivedata=="iwanttoplay"){
+		if(receivedata != nullptr){
 			for(int i = 0;i < game->mainMap->getBlockY();i++)
 				for(int j = 0;j < game->mainMap->getBlockX();j++){
 					myBytes[i*game->mainMap->getBlockX()+j] = (*temp_map)[i][j];
 				}
 			tcpClient->Send(myBytes);
-			
+			charName = gcnew String(receivedata);
 		}
 		receivedata = nullptr;
 		//**************end of send map**********
@@ -158,8 +162,10 @@ void TCPServer::HandleClientComm(Object ^client){
 		if(receivedata != nullptr){
 		//**************new character************
 			ID = game->generateID();
+			MarshalString(charName, char_Name);
+			System::Diagnostics::Debug::WriteLine(Convert::ToString(char_Name.length()));
 			try{
-				mainchr = game->MakeNewChar(1000, 500, ID);
+				mainchr = game->MakeNewChar(1000, 500, ID, char_Name);
 			}catch(Exception ^chr_err){
 				err_msg += chr_err->Message + "\n";
 			}
@@ -177,19 +183,6 @@ void TCPServer::HandleClientComm(Object ^client){
 		receivedata = nullptr;
 		while(true){
 			try{
-				/*try{
-					do{
-						myBufferBytes = gcnew array <unsigned char>(1024);
-						dataLength  = tcpClient->Receive(myBufferBytes);
-						if (dataLength > 0){
-							receivedata += Encoding::ASCII->GetString(myBufferBytes, 0, dataLength);
-						}
-					}while(tcpClient->Available);
-				}catch(Exception ^recv_err){
-					System::Diagnostics::Debug::WriteLine("here");
-					err_msg = recv_err->Message;
-					break;
-				}*/
 				try{
 					myBufferBytes = gcnew array <unsigned char>(tcpClient->SendBufferSize);
 					dataLength = tcpClient->Receive(myBufferBytes);
