@@ -60,7 +60,7 @@ void Map::MakeMap()
 			if (r == 0 || i == 0 || i == blockY - 1 || r == blockX - 1)
 				blockMap[i][r] = 100;
 			else if (r % 2 == 0 && i % 2 == 0)
-				blockMap[i][r] = 100;
+				blockMap[i][r] = 11;
 			else 
 				blockMap[i][r] = 0;
 			

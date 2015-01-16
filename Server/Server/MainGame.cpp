@@ -370,15 +370,8 @@ string MainGame::getCommand(MainCharacter *mainChar){
 			}
 		}
 		if(flag & DEL_CHAR){
-			for(i = 0;i < vMainChar.size();i++){
-				if(vMainChar[i] != NULL){
-					if(vMainChar[i]->getId() == mainChar->getDelCharID()){
-						com += "del" + ConvertToString(vMainChar[i]->getId())+ ")";
-						mainChar->clearDelCharID();
-						break;
-					}
-				}
-			}
+			com += "del" + ConvertToString(mainChar->getDelCharID())+ ")";
+			mainChar->clearDelCharID();
 		}
 		if(flag & NEW_BOMB){
 			com += "dpb" + ConvertToString(mainChar->getBombX()) + "," +ConvertToString(mainChar->getBombY())
