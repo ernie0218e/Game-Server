@@ -89,7 +89,7 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 	
 	int status = mainChar->getStatus();
 
-	mainChar->setCmdFlag(MOVE_CHAR);
+	mainChar->cmd->setCmdFlag(MOVE_CHAR);
 	if (status != 0)
 	{
 		
@@ -215,8 +215,8 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 			if(mainMap->DropBomb(_x, _y)){
 				for(int i = 0;i < vMainChar.size();i++){
 					if(vMainChar[i] != NULL){
-						vMainChar[i]->setCmdFlag(NEW_BOMB);
-						vMainChar[i]->setBomb(_x, _y);
+						vMainChar[i]->cmd->setCmdFlag(NEW_BOMB);
+						vMainChar[i]->cmd->setBomb(_x, _y);
 					}
 				}
 			}
@@ -280,8 +280,8 @@ void MainGame::CheckHit(MainCharacter *mainChar)
 		if(mainChar->Hit()){
 			for(int i = 0;i < vMainChar.size();i++){
 				if(vMainChar[i] != NULL){
-					vMainChar[i]->setCmdFlag(GET_HIT);
-					vMainChar[i]->setHitID(mainChar->getId());
+					vMainChar[i]->cmd->setCmdFlag(GET_HIT);
+					vMainChar[i]->cmd->setHitID(mainChar->getId());
 				}
 			}
 		}
@@ -297,7 +297,7 @@ void MainGame::deleteChar(int d_id)
 				delete vMainChar[i];
 				vMainChar[i] = NULL;
 			}else{
-				vMainChar[i]->setCmdFlag(DEL_CHAR, d_id);
+				vMainChar[i]->cmd->setCmdFlag(DEL_CHAR, d_id);
 			}
 		}
 	}
@@ -309,11 +309,11 @@ MainCharacter* MainGame::MakeNewChar(double x,double y, int id, string name)
 	mainChar = new MainCharacter(x , y, 0, id, name);
 	vMainChar.push_back(mainChar);
 	
-	mainChar->setCmdFlag(NEW_ALL_CHAR);
+	mainChar->cmd->setCmdFlag(NEW_ALL_CHAR);
 	for(int i = 0;i < vMainChar.size();i++){
 		if(vMainChar[i] != NULL){
 			if(vMainChar[i] != mainChar)
-				vMainChar[i]->setCmdFlag(NEW_CHAR, mainChar->getId());
+				vMainChar[i]->cmd->setCmdFlag(NEW_CHAR, mainChar->getId());
 		}
 	}
 
@@ -337,7 +337,7 @@ std::string MainGame::ConvertToString(int t) {
 string MainGame::getCommand(MainCharacter *mainChar){
 	string com = "";
 	int i, flag;
-	flag = mainChar->getCmdFlag();
+	flag = mainChar->cmd->getCmdFlag();
 	if(flag != 0){
 		if(flag & MOVE_CHAR){
 			for(i = 0;i < vMainChar.size();i++){
@@ -350,11 +350,11 @@ string MainGame::getCommand(MainCharacter *mainChar){
 		if(flag & NEW_CHAR){
 			for(i = 0;i < vMainChar.size();i++){
 				if(vMainChar[i] != NULL){
-					if(vMainChar[i]->getId() == mainChar->getNewCharID()){
+					if(vMainChar[i]->getId() == mainChar->cmd->getNewCharID()){
 						com += "nch" + ConvertToString(vMainChar[i]->getId()) + "," + ConvertToString(vMainChar[i]->getX())+
 						"," + ConvertToString(vMainChar[i]->getY()) + "," + ConvertToString(vMainChar[i]->getGraphCode()) + ","
 						+ vMainChar[i]->getCharName() + ")";
-						mainChar->clearNewCharID();
+						mainChar->cmd->clearNewCharID();
 						break;
 					}
 				}
@@ -370,18 +370,24 @@ string MainGame::getCommand(MainCharacter *mainChar){
 			}
 		}
 		if(flag & DEL_CHAR){
-			com += "del" + ConvertToString(mainChar->getDelCharID())+ ")";
-			mainChar->clearDelCharID();
+			com += "del" + ConvertToString(mainChar->cmd->getDelCharID())+ ")";
+			mainChar->cmd->clearDelCharID();
 		}
 		if(flag & NEW_BOMB){
-			com += "dpb" + ConvertToString(mainChar->getBombX()) + "," +ConvertToString(mainChar->getBombY())
-			+")";
+			while(!mainChar->cmd->getBombX().empty() && !mainChar->cmd->getBombY().empty()){
+				com += "dpb" + ConvertToString(mainChar->cmd->getBombX().top()) + "," +ConvertToString(mainChar->cmd->getBombY().top())+")";
+				mainChar->cmd->getBombX().pop();
+				mainChar->cmd->getBombY().pop();
+			}
 		}
 		if(flag & GET_HIT){
-			com += "hit" + ConvertToString(mainChar->getHitID())+")";	//hit ID needs more!!
+			while(!mainChar->cmd->getHitID().empty()){
+				com += "hit" + ConvertToString(mainChar->cmd->getHitID().top())+")";
+				mainChar->cmd->getHitID().pop();
+			}
 		}
 	}
 
-	mainChar->clearCmdFlag();
+	mainChar->cmd->clearCmdFlag();
 	return com;
 }

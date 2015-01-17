@@ -71,6 +71,7 @@ namespace Server {
 
 	private: TCPServer ^test;
 	private: System::String^ err_msg;
+	private: System::Windows::Forms::Button^  button1;
 	private: System::String^ msg;
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -89,6 +90,7 @@ namespace Server {
 			this->comboBox1 = (gcnew System::Windows::Forms::ComboBox());
 			this->Log = (gcnew System::Windows::Forms::RichTextBox());
 			this->Stop_server = (gcnew System::Windows::Forms::Button());
+			this->button1 = (gcnew System::Windows::Forms::Button());
 			this->SuspendLayout();
 			// 
 			// IPlabel
@@ -96,7 +98,7 @@ namespace Server {
 			this->IPlabel->AutoSize = true;
 			this->IPlabel->Font = (gcnew System::Drawing::Font(L"新細明體", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->IPlabel->Location = System::Drawing::Point(12, 138);
+			this->IPlabel->Location = System::Drawing::Point(12, 169);
 			this->IPlabel->Name = L"IPlabel";
 			this->IPlabel->Size = System::Drawing::Size(14, 15);
 			this->IPlabel->TabIndex = 0;
@@ -106,7 +108,7 @@ namespace Server {
 			// 
 			this->Start_server->Font = (gcnew System::Drawing::Font(L"微軟正黑體", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->Start_server->Location = System::Drawing::Point(12, 68);
+			this->Start_server->Location = System::Drawing::Point(12, 99);
 			this->Start_server->Name = L"Start_server";
 			this->Start_server->Size = System::Drawing::Size(99, 29);
 			this->Start_server->TabIndex = 1;
@@ -119,7 +121,7 @@ namespace Server {
 			this->connection_count->AutoSize = true;
 			this->connection_count->Font = (gcnew System::Drawing::Font(L"微軟正黑體", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->connection_count->Location = System::Drawing::Point(157, 162);
+			this->connection_count->Location = System::Drawing::Point(157, 193);
 			this->connection_count->Name = L"connection_count";
 			this->connection_count->Size = System::Drawing::Size(20, 22);
 			this->connection_count->TabIndex = 2;
@@ -135,7 +137,7 @@ namespace Server {
 			this->label1->AutoSize = true;
 			this->label1->Font = (gcnew System::Drawing::Font(L"微軟正黑體", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->label1->Location = System::Drawing::Point(8, 162);
+			this->label1->Location = System::Drawing::Point(8, 193);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(132, 22);
 			this->label1->TabIndex = 3;
@@ -146,7 +148,7 @@ namespace Server {
 			this->label2->AutoSize = true;
 			this->label2->Font = (gcnew System::Drawing::Font(L"微軟正黑體", 10.2F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->label2->Location = System::Drawing::Point(8, 116);
+			this->label2->Location = System::Drawing::Point(8, 147);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(92, 22);
 			this->label2->TabIndex = 4;
@@ -176,7 +178,7 @@ namespace Server {
 			// 
 			this->Stop_server->Font = (gcnew System::Drawing::Font(L"微軟正黑體", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(0)));
-			this->Stop_server->Location = System::Drawing::Point(127, 68);
+			this->Stop_server->Location = System::Drawing::Point(127, 99);
 			this->Stop_server->Name = L"Stop_server";
 			this->Stop_server->Size = System::Drawing::Size(98, 29);
 			this->Stop_server->TabIndex = 7;
@@ -184,11 +186,24 @@ namespace Server {
 			this->Stop_server->UseVisualStyleBackColor = true;
 			this->Stop_server->Click += gcnew System::EventHandler(this, &Form1::Stop_server_Click);
 			// 
+			// button1
+			// 
+			this->button1->Font = (gcnew System::Drawing::Font(L"微軟正黑體", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(136)));
+			this->button1->Location = System::Drawing::Point(13, 53);
+			this->button1->Name = L"button1";
+			this->button1->Size = System::Drawing::Size(98, 30);
+			this->button1->TabIndex = 8;
+			this->button1->Text = L"Refresh IP";
+			this->button1->UseVisualStyleBackColor = true;
+			this->button1->Click += gcnew System::EventHandler(this, &Form1::button1_Click);
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 15);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(564, 428);
+			this->Controls->Add(this->button1);
 			this->Controls->Add(this->Stop_server);
 			this->Controls->Add(this->Log);
 			this->Controls->Add(this->comboBox1);
@@ -198,7 +213,7 @@ namespace Server {
 			this->Controls->Add(this->Start_server);
 			this->Controls->Add(this->IPlabel);
 			this->Name = L"Form1";
-			this->Text = L"Form1";
+			this->Text = L"Server";
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -208,6 +223,7 @@ namespace Server {
 				 test->setIP(comboBox1->Text);
 				 test->Start();
 				 IPlabel->Text = test->serverIP();
+				 Log->Text += "Server Start!!\n";
 				 timer1->Start();
 			 }
 	private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
@@ -224,8 +240,23 @@ namespace Server {
 	private: System::Void Stop_server_Click(System::Object^  sender, System::EventArgs^  e) {
 				 test->Stop();
 				 IPlabel->Text = "0";
+				 Log->Text += "Server Stop!!\n";
 				 timer1->Stop();
 			 }
+private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
+			 comboBox1->Items->Clear();
+			 String ^iparr;
+			 int i = 0, spt;
+			 iparr = test->getIParray();
+
+			 while(i < iparr->Length){
+				 spt = i;
+				 i = iparr->IndexOf("\n", i);
+				 comboBox1->Items->Add(iparr->Substring(spt, i - spt));
+				 i++;
+			 }
+			 comboBox1->SelectedIndex = 0;
+		 }
 };
 }
 

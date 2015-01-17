@@ -54,6 +54,9 @@
     <ClCompile Include="Object.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
+    <ClCompile Include="Command.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Form1.h">
@@ -87,6 +90,9 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Command.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
