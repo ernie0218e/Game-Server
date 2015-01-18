@@ -120,6 +120,52 @@ bool AI::MoveDone()
 	return key.empty();
 }
 
+void AI::setX()
+{
+
+}
+
+void AI::setY()
+{
+
+}
+
+void AI::setArrX()
+{
+
+}
+
+void AI::setArrY()
+{
+
+}
+
+void AI::setFinalArrX()
+{
+
+}
+
+void AI::setFinalArrY()
+{
+
+}
+
+const vector <int> & AI::getKeyVector()
+{
+
+	return key;
+}
+
+int AI::getArrX()
+{
+	return arrX;
+}
+
+int AI::getArrY()
+{
+	return arrY;
+}
+
 node::node(int xp, int yp, int d, int p)
 {
 	xPos = xp; yPos = yp; level = d; priority = p;

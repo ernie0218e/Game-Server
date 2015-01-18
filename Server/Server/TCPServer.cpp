@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "TCPServer.h"
+#include "AI_System.h"
 
 TCPServer::TCPServer(void){
 	IP = gcnew String("127.0.0.1");
@@ -43,6 +44,8 @@ int TCPServer::Start(int player_num)
 	this->tcpListener = gcnew TcpListener(IPAddress::Parse(IP), 9011);
 	this->listenThread = gcnew Thread(gcnew ThreadStart(this, &TCPServer::ListenForClients));
 	this->listenThread->Start();
+
+	NewAIThread();
 	return 0;
 }
 
@@ -245,4 +248,49 @@ String^ TCPServer::getMessage()
 	String ^temp = gcnew String(msg);
 	msg = nullptr;
 	return temp;
+}
+
+void TCPServer::setAINum(int num)
+{
+	aiNumber = num;
+}
+
+void TCPServer::NewAIThread()
+{
+	for(int i = 0; i < 1;i++){
+		aiThread = gcnew Thread(gcnew ThreadStart(this, &TCPServer::aiClient));
+		aiThread->Start();
+		Sleep(160);
+	}
+}
+
+void TCPServer::aiClient()
+{
+	MainCharacter *mainchr;
+	AI_System *ai_sys;
+	int ID;
+	ID = game->generateID();
+	try{
+		mainchr = game->MakeNewChar(ID, "AI");
+	}catch(Exception ^chr_err){
+		err_msg += chr_err->Message + "\n";
+		return;
+	}
+	try{
+		ai_sys = new AI_System(mainchr, game->mainMap);
+	}catch(Exception ^ai_err){
+		err_msg += ai_err->Message + "\n";
+		return;
+	}
+	mainchr->cmd->setReady();
+	while(1){
+		//ai can compute here
+		Sleep(20);
+		ai_sys->compute();
+		mainchr->setStatus(ai_sys->getKey()); //ai compute result
+		game->getCommand(mainchr);
+		if(mainchr->getHp() <= 0)
+			break;
+	}
+	game->deleteChar(mainchr->getId());
 }

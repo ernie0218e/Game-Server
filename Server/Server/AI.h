@@ -45,6 +45,8 @@ public:
 	void setY();
 	void setArrX();
 	void setArrY();
+	int getArrX();
+	int getArrY();
 	void setFinalArrX();
 	void setFinalArrY();
 	void ProxX();

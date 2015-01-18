@@ -18,19 +18,23 @@ private:
 	TcpListener^ tcpListener;
 	Thread^ listenThread;
 	Thread^ gameThread;
-	
+	Thread^ aiThread;
+	int aiNumber;
 	//List<Socket^>^ socketList;
 	int connection_count;
 	void gameStart(void);
 	void ListenForClients(void);
 	void HandleClientComm(Object^);
 	void MarshalString(String ^, string&);
+	void NewAIThread();
+	void aiClient();
 public:
 	TCPServer();
 	~TCPServer();
 	int Start(int);
 	void Stop();
 	void setIP(String ^);
+	void setAINum(int);
 	String^ serverIP();
 	String^ serverCount();
 	String^ getIParray();

@@ -34,6 +34,7 @@ namespace Server {
 			//
 			//TODO: 婓森樓膘?滲宒最宒徨
 			//
+			pre_ai_num = 0;
 		}
 
 	protected:
@@ -57,7 +58,7 @@ namespace Server {
 		/// <summary>
 		/// 偞?馱撿垀剒腔?﹝
 		/// </summary>
-
+		int pre_ai_num;
 	private: System::Windows::Forms::Button^  Start_server;
 	private: System::Windows::Forms::Label^  connection_count;
 	private: System::Windows::Forms::Timer^  timer1;
@@ -75,6 +76,8 @@ namespace Server {
 	private: System::Windows::Forms::NumericUpDown^  player_num;
 
 	private: System::Windows::Forms::Label^  label3;
+	private: System::Windows::Forms::NumericUpDown^  numericUpDown1;
+	private: System::Windows::Forms::Label^  label4;
 	private: System::String^ msg;
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -96,7 +99,10 @@ namespace Server {
 			this->button1 = (gcnew System::Windows::Forms::Button());
 			this->player_num = (gcnew System::Windows::Forms::NumericUpDown());
 			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->numericUpDown1 = (gcnew System::Windows::Forms::NumericUpDown());
+			this->label4 = (gcnew System::Windows::Forms::Label());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->player_num))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown1))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// IPlabel
@@ -225,11 +231,33 @@ namespace Server {
 			this->label3->TabIndex = 10;
 			this->label3->Text = L"Player Number:";
 			// 
+			// numericUpDown1
+			// 
+			this->numericUpDown1->Location = System::Drawing::Point(12, 344);
+			this->numericUpDown1->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {3, 0, 0, 0});
+			this->numericUpDown1->Name = L"numericUpDown1";
+			this->numericUpDown1->Size = System::Drawing::Size(120, 25);
+			this->numericUpDown1->TabIndex = 11;
+			this->numericUpDown1->ValueChanged += gcnew System::EventHandler(this, &Form1::numericUpDown1_ValueChanged);
+			// 
+			// label4
+			// 
+			this->label4->AutoSize = true;
+			this->label4->Font = (gcnew System::Drawing::Font(L"微軟正黑體", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
+			this->label4->Location = System::Drawing::Point(9, 322);
+			this->label4->Name = L"label4";
+			this->label4->Size = System::Drawing::Size(88, 19);
+			this->label4->TabIndex = 12;
+			this->label4->Text = L"AI Number:";
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 15);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(564, 428);
+			this->Controls->Add(this->label4);
+			this->Controls->Add(this->numericUpDown1);
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->player_num);
 			this->Controls->Add(this->button1);
@@ -244,6 +272,7 @@ namespace Server {
 			this->Name = L"Form1";
 			this->Text = L"Server";
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->player_num))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->numericUpDown1))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -251,7 +280,8 @@ namespace Server {
 #pragma endregion
 	private: System::Void Start_server_Click(System::Object^  sender, System::EventArgs^  e) {
 				 test->setIP(comboBox1->Text);
-				 test->Start(Convert::ToInt32(player_num->Text));
+				 test->Start(Convert::ToInt32(player_num->Text) + Convert::ToInt32(numericUpDown1->Text));
+				 test->setAINum(Convert::ToInt32(numericUpDown1->Text));
 				 IPlabel->Text = test->serverIP();
 				 Log->Text += "Server Start!!\n";
 				 Log->Text += "The required player number is:" + player_num->Text + "\n";
@@ -287,6 +317,22 @@ private: System::Void button1_Click(System::Object^  sender, System::EventArgs^ 
 				 i++;
 			 }
 			 comboBox1->SelectedIndex = 0;
+		 }
+private: System::Void numericUpDown1_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+
+			 if(Convert::ToInt32(numericUpDown1->Value) > pre_ai_num){
+				 if(player_num->Value > player_num->Minimum){
+					player_num->Value = player_num->Value - 1;
+				 }
+				 player_num->Maximum = player_num->Maximum - 1;
+				 player_num->Minimum = 1;
+			 }else if(Convert::ToInt32(numericUpDown1->Value) < pre_ai_num){
+				 player_num->Maximum = player_num->Maximum + 1;
+				 player_num->Value = player_num->Value + 1;
+			 }
+			 if(Convert::ToInt32(numericUpDown1->Value) == 0)
+				 player_num->Minimum = 2;
+			 pre_ai_num = Convert::ToInt32(numericUpDown1->Value);
 		 }
 };
 }
