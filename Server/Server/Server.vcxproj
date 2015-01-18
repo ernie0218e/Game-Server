@@ -92,6 +92,7 @@
     <ClCompile Include="Block.cpp" />
     <ClCompile Include="Bomb.cpp" />
     <ClCompile Include="Command.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="MainCharacter.cpp" />
     <ClCompile Include="MainGame.cpp" />
     <ClCompile Include="Map.cpp">
@@ -113,6 +114,7 @@
     <ClInclude Include="Form1.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="Item.h" />
     <ClInclude Include="MainCharacter.h" />
     <ClInclude Include="MainGame.h" />
     <ClInclude Include="Map.h" />

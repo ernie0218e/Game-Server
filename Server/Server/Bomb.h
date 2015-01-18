@@ -10,15 +10,20 @@ class Bomb :
 	int blastCount;
 	int arrX;
 	int arrY;
+	int id;
 	bool exploded;
+	int bombRange;
 public:
-
+	void setID(int id);
 	void setArrY(int y);
 	void setArrX(int x);
 	void setExploded();
 	bool getExploded();
+	int getID();
 	int getArrY();
 	int getArrX();
+	int getBombRange();
+	void setBombRange(int range);
 	void increaseExplodeCount(int t);
 	void increaseBlastCount(int t);
 	int getExplodeCount();

@@ -4,12 +4,15 @@
 #include "Blast.h"
 #include <vector>
 #include "stdafx.h"
+#include "Item.h"
+#include "MainCharacter.h"
 class Map 
 {
 	const int blockX;
 	const int blockY;
 	const int blockSize;
-	char **blockMap; 
+	char **blockMap;
+	int **itemMap;
 	char **bombMap;
 	int **blastMap;
 	Bomb bomb;
@@ -18,6 +21,7 @@ class Map
 	vector <Block *> vBlock;
 	vector <Bomb *> vBomb;
 	vector <Blast *> vBlast;
+	vector <Item *> vItem;
 public:
 	Map();
 	~Map();
@@ -26,6 +30,7 @@ public:
 	vector <Block *> &getBlockVector();
 	vector <Bomb *> &getBombVector();
 	vector <Blast *> &getBlastVector();
+	vector <Item *> &getItemVector();
 	void MakeMap();
 	int getBlockX();
 	int getBlockY();
@@ -33,11 +38,12 @@ public:
 	Bomb *getBomb();
 	Blast *getBlast();
 	Blast *getmBlast();
-	bool DropBomb(double x, double y);
+	bool DropBomb(double x, double y, int range, int id);
+	void DropItem(int x, int y);
 	void ClearBomb(int );
 	void UpdateBombTimer();
-	void CheckBombExplode();
-	void MakeBlast(int arrX, int arrY);
+	void CheckBombExplode(vector <MainCharacter *> &vMainChar);
+	void MakeBlast(int arrX, int arrY, int range);
 	void UpdateBlastTimer();
 	void CheckBlastGrow();
 };

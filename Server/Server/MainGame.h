@@ -28,10 +28,12 @@ private:
 	vector<MainCharacter*> vMainChar;
 	
 	int newChr_count;
+	bool allReady;
 
 	void MoveMainChar(MainCharacter*);
 	void FrameDelay();
 	void CheckHit(MainCharacter *);
+	bool CheckReady();
 
 	string ConvertToString(int );
 	//press key info
@@ -40,7 +42,8 @@ private:
 		DOWN = 0x00000002,
 		LEFT = 0x00000004,
 		RIGHT = 0x00000008,
-		ZK = 0x00000010
+		ZK = 0x00000010,
+		SPACE = 0x00000020
 	};
 
 	enum char_command_flags{
@@ -49,7 +52,8 @@ private:
 		NEW_ALL_CHAR = 0x00000004,
 		DEL_CHAR = 0x00000008,
 		NEW_BOMB = 0x00000010,
-		GET_HIT = 0x00000020
+		GET_HIT = 0x00000020,
+		READY = 0x00000040
 	};
 };
 

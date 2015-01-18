@@ -7,6 +7,7 @@ Command::Command(void)
 	command_flag = 0;
 	delChar_id = 0;
 	newChar_id = 0;
+	ready = 0;
 }
 
 
@@ -83,13 +84,39 @@ stack<int>& Command::getHitID()
 	return hit_id;
 }
 
-void Command::setBomb(int x, int y)
+void Command::setBomb(int x, int y, int r)
 {
 	bomb_x.push(x);
 	bomb_y.push(y);
+	bomb_range.push(r);
 }
 
 void Command::setHitID(int _id)
 {
 	hit_id.push(_id);
+}
+
+stack<int>& Command::getBombRange()
+{
+	return bomb_range;
+}
+
+void Command::setReadyID(int _id)
+{
+	ready_id.push(_id);
+}
+
+stack<int>& Command::getReadyID()
+{
+	return ready_id;
+}
+
+void Command::setReady()
+{
+	ready = 1;
+}
+
+int Command::getReady()
+{
+	return ready;
 }

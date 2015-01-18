@@ -12,6 +12,7 @@ class Blast :
 	int disappearSecond;
 	int id;
 	bool grown;
+	int bombRange;
 public:
 	enum{UP=0, DOWN=1, LEFT=2, RIGHT=3, STATIC=4};
 	Blast();
@@ -22,6 +23,8 @@ public:
 	int getArrX();
 	int getArrY();
 	int getId();
+	int getBombRange();
+	void setBombRange(int range);
 	void setId(int x);
 	void setArrX(int x);
 	void setArrY(int y);

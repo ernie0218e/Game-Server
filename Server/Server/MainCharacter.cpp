@@ -15,11 +15,14 @@ MainCharacter::MainCharacter(double x, double y, int graphCode, int id, string n
 	this->graphCode = graphCode;
 	damageImmuneCount = 0;
 	damageImmuneSecond = 700;
+	bombDropCount = 0;
+	bombDropMax = 3;
 	this->x = x;
 	this->y = y;
-	hp = 100;
+	hp = 5;
 	moveSpeed = 3;
 	facing = DOWN;
+	bombRange = 1;
 }
 
 
@@ -56,7 +59,7 @@ bool MainCharacter::Hit()
 {
 	if (damageImmuneCount == 0)
 	{
-		hp -= 10;
+		hp --;
 		damageImmuneCount = 1;
 		return true;
 	}
@@ -122,4 +125,46 @@ std::string MainCharacter::getCharName()
 {
 	return charName;
 }
+
+int MainCharacter::getBombRange()
+{
+	return bombRange;
+}
+
+int MainCharacter::getBombDropCount()
+{
+	return bombDropCount;
+}
+
+int MainCharacter::getBombDropMax()
+{
+	return bombDropMax;
+}
+
+void MainCharacter::decreaseBombDropCount()
+{
+	bombDropCount--;
+}
+
+void MainCharacter::increaseBombDropCount()
+{
+	bombDropCount++;
+}
+
+void MainCharacter::increaseBombDropMax()
+{
+	bombDropMax++;
+}
+
+void MainCharacter::decreaseBombDropMax()
+{
+	bombDropMax--;
+}
+
+
+
+
+
+
+
 

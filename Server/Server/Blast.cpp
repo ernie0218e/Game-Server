@@ -97,3 +97,13 @@ void Blast::setId(int x)
 {
 	id = x;
 }
+
+int Blast::getBombRange()
+{
+	return bombRange;
+}
+
+void Blast::setBombRange(int range)
+{
+	bombRange = range;
+}

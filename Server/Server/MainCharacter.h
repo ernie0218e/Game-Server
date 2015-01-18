@@ -20,6 +20,9 @@ class MainCharacter	: public Object
 	int graphCode;
 	int damageImmuneSecond;
 	int damageImmuneCount;
+	int bombDropCount;
+	int bombDropMax;
+	int bombRange;
 public:
 	enum{ UP, DOWN, LEFT, RIGHT };
 	MainCharacter(double, double, int , int, string);
@@ -28,6 +31,8 @@ public:
 	Command *cmd;
 
 	double getMoveSpeed();
+	int getBombDropCount();
+	int getBombDropMax();
 	int getHp();
 	int getId();
 	int getStatus();
@@ -39,6 +44,11 @@ public:
 	void setFacing(int f);
 	void setGrpahCode(int);
 	void setMoveSpeed(double m);
+	void decreaseBombDropCount();
+	void increaseBombDropCount();
+	void increaseBombDropMax();
+	void decreaseBombDropMax();
+	int getBombRange();
 	bool Hit();
 	void MoveWithDisplacement(double dx, double dy);
 };

@@ -74,3 +74,23 @@ bool Bomb::getExploded()
 {
 	return exploded;
 }
+
+int Bomb::getBombRange()
+{
+	return bombRange;
+}
+
+void Bomb::setBombRange(int range)
+{
+	bombRange = range;
+}
+
+void Bomb::setID(int id)
+{
+	this->id = id;
+}
+
+int Bomb::getID()
+{
+	return id;
+}

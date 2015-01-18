@@ -10,7 +10,7 @@
 
 MainGame::MainGame()
 {
-
+	allReady = false;
 }
 
 
@@ -29,7 +29,7 @@ void MainGame::Update()
 {
 	FrameDelay();
 	mainMap->UpdateBombTimer();
-	mainMap->CheckBombExplode();
+	mainMap->CheckBombExplode(vMainChar);
 	mainMap->UpdateBlastTimer();
 	mainMap->CheckBlastGrow();
 	for(int i = 0;i < vMainChar.size();i++){
@@ -44,6 +44,11 @@ void MainGame::Update()
 		}
 	}
 	
+	if(!allReady){
+		if(CheckReady()){
+			allReady = true;
+		}
+	}
 	// read
 	// send
 	// draw
@@ -55,7 +60,6 @@ MainGame::~MainGame()
 	
 }
 
-//修改成多人版本
 void MainGame::MoveMainChar(MainCharacter* mainChar)
 {
 	blockMap = mainMap->getBlockMap();
@@ -207,17 +211,33 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 
 			mainChar->setFacing(MainCharacter::RIGHT);
 		}
-		if (status&ZK)
+		if ((status&ZK) && allReady)
 		{
-			int _x, _y;
+			int _x, _y, _r, _id;
 			_x = mainChar->getX();
 			_y = mainChar->getY();
-			if(mainMap->DropBomb(_x, _y)){
-				for(int i = 0;i < vMainChar.size();i++){
-					if(vMainChar[i] != NULL){
-						vMainChar[i]->cmd->setCmdFlag(NEW_BOMB);
-						vMainChar[i]->cmd->setBomb(_x, _y);
+			_r = mainChar->getBombRange();
+			_id= mainChar->getId();
+			if(mainChar->getBombDropCount()<mainChar->getBombDropMax())
+			{
+				if(mainMap->DropBomb(_x, _y, _r, _id)){
+					for(int i = 0;i < vMainChar.size();i++){
+						if(vMainChar[i] != NULL){
+							vMainChar[i]->cmd->setCmdFlag(NEW_BOMB);
+							vMainChar[i]->cmd->setBomb(_x, _y, _r);
+						}
 					}
+					mainChar->increaseBombDropCount();
+				}
+			}
+
+		}
+		if(status&SPACE){
+			mainChar->cmd->setReady();
+			for(int i = 0;i < vMainChar.size();i++){
+				if(vMainChar[i] != NULL){
+					vMainChar[i]->cmd->setCmdFlag(READY);
+					vMainChar[i]->cmd->setReadyID(mainChar->getId());
 				}
 			}
 		}
@@ -306,7 +326,9 @@ void MainGame::deleteChar(int d_id)
 MainCharacter* MainGame::MakeNewChar(double x,double y, int id, string name)
 {
 	MainCharacter *mainChar;
-	mainChar = new MainCharacter(x , y, 0, id, name);
+	int graphCode = 0;
+	mainChar = new MainCharacter(x , y, graphCode, id, name);
+	//graphCode = (++graphCode)%2;
 	vMainChar.push_back(mainChar);
 	
 	mainChar->cmd->setCmdFlag(NEW_ALL_CHAR);
@@ -343,7 +365,8 @@ string MainGame::getCommand(MainCharacter *mainChar){
 			for(i = 0;i < vMainChar.size();i++){
 				if(vMainChar[i] != NULL){
 					com += "mch" + ConvertToString(vMainChar[i]->getId()) + "," + ConvertToString(vMainChar[i]->getX())+
-					"," + ConvertToString(vMainChar[i]->getY()) + "," + ConvertToString(vMainChar[i]->getGraphCode()) + ")";
+					"," + ConvertToString(vMainChar[i]->getY()) + "," + ConvertToString(vMainChar[i]->getGraphCode()) + 
+					ConvertToString(vMainChar[i]->getFacing()) +")";
 				}
 			}
 		}
@@ -374,10 +397,12 @@ string MainGame::getCommand(MainCharacter *mainChar){
 			mainChar->cmd->clearDelCharID();
 		}
 		if(flag & NEW_BOMB){
-			while(!mainChar->cmd->getBombX().empty() && !mainChar->cmd->getBombY().empty()){
-				com += "dpb" + ConvertToString(mainChar->cmd->getBombX().top()) + "," +ConvertToString(mainChar->cmd->getBombY().top())+")";
+			while(!mainChar->cmd->getBombX().empty() && !mainChar->cmd->getBombY().empty() && !mainChar->cmd->getBombRange().empty()){
+				com += "dpb" + ConvertToString(mainChar->cmd->getBombX().top()) + "," +ConvertToString(mainChar->cmd->getBombY().top())
+					+ "," + ConvertToString(mainChar->cmd->getBombRange().top()) + ")";
 				mainChar->cmd->getBombX().pop();
 				mainChar->cmd->getBombY().pop();
+				mainChar->cmd->getBombRange().pop();
 			}
 		}
 		if(flag & GET_HIT){
@@ -386,8 +411,37 @@ string MainGame::getCommand(MainCharacter *mainChar){
 				mainChar->cmd->getHitID().pop();
 			}
 		}
+		if(flag & READY){
+			while(!mainChar->cmd->getReadyID().empty()){
+				com += "rdy" + ConvertToString(mainChar->cmd->getReadyID().top()) + ")";
+				mainChar->cmd->getReadyID().pop();
+			}
+		}
 	}
 
 	mainChar->cmd->clearCmdFlag();
 	return com;
+}
+
+bool MainGame::CheckReady()
+{
+	int tmp = 0;
+
+	if(vMainChar.size() == 0)
+		return false;
+
+	for(int i = 0;i < vMainChar.size();i++){
+		if(vMainChar[i] != NULL){
+			if(!vMainChar[i]->cmd->getReady()){
+				return false;
+			}
+		}else{
+			tmp++;
+		}
+	}
+	
+	if(vMainChar.size() == tmp)
+		return false;
+
+	return true;
 }

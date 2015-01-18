@@ -14,12 +14,14 @@ Map::Map() : blockX(25), blockY(17), blockSize(45)
 	blockMap = new char*[blockX];
 	bombMap = new char*[blockX];
 	blastMap = new int*[blockX];
+	itemMap = new int*[blockX];
 
 	for (i = 0; i < blockX; i++)
 	{
 		blockMap[i] = new char[blockY];
 		bombMap[i] = new char[blockY];
 		blastMap[i] = new int[blockY];
+		itemMap[i] = new int[blockY];
 	}
 
 	for (i = 0 ; i < blockY ; i++)
@@ -27,6 +29,7 @@ Map::Map() : blockX(25), blockY(17), blockSize(45)
 		{		
 			bombMap[i][r] = 0;
 			blastMap[i][r] = 99999;
+			itemMap[i][r] = 0;
 		}
 	
 }
@@ -63,7 +66,7 @@ void Map::MakeMap()
 				blockMap[i][r] = 11;
 			else 
 				blockMap[i][r] = 0;
-			
+			itemMap[i][r] = ( rand()%10 )%2;
 		}
 	}
 	for (i = 0; i < blockY; i++){
@@ -93,8 +96,18 @@ int Map::getBlockX()
 {
 	return blockX;
 }
+void Map::DropItem(int x, int y)
+{
+	Item *tempI = new Item;
+	tempI->setX(x);
+	tempI->setY(y);
+	tempI->setArrX((int)x / blockSize);
+	tempI->setArrY((int)y / blockSize);
+	vItem.push_back(tempI);
+	itemMap[(int)y / blockSize][(int)x / blockSize] = Item::randItemType();
+}
 
-bool Map::DropBomb(double x, double y)
+bool Map::DropBomb(double x, double y, int range, int id)
 {
 	if (bombMap[(int)y / blockSize][(int)x / blockSize] == 0)
 	{
@@ -103,6 +116,8 @@ bool Map::DropBomb(double x, double y)
 		tempB->setY(y);
 		tempB->setArrX((int)x / blockSize);
 		tempB->setArrY((int)y / blockSize);
+		tempB->setID(id);
+		tempB->setBombRange(range);
 		vBomb.push_back(tempB);
 
 		bombMap[(int)y / blockSize][(int)x / blockSize] = 1;
@@ -148,9 +163,8 @@ void Map::UpdateBombTimer()
 	lastTime = currentTime;
 }
 
-void Map::CheckBombExplode()
+void Map::CheckBombExplode(vector <MainCharacter *> &vMainChar)
 {
-
 	Bomb *tempB;
 	int max = vBomb.size();
 	for (int i = 0; i < max; i++)
@@ -163,14 +177,22 @@ void Map::CheckBombExplode()
 			if (tempB->getExplodeCount() >= tempB->getExplodeSecond())
 			{
 				tempB->setExploded();
+
 				///implement explosion here////////////////////////
 
 			}
 		}
 		else if (tempB->getBlastCount() >= tempB->getBlastSecond())
 		{
-
-			MakeBlast(tempB->getArrX(), tempB->getArrY());
+			for(int r=0 ; r<vMainChar.size() ; r++)
+			{
+				if(vMainChar[r]!=nullptr && tempB->getID() == vMainChar[r]->getId())
+				{
+					vMainChar[r]->decreaseBombDropCount();
+					break;
+				}
+			}
+			MakeBlast(tempB->getArrX(), tempB->getArrY(), tempB->getBombRange());
 			bombMap[tempB->getArrY()][tempB->getArrX()] = 0;
 			delete tempB;
 			vBomb.erase(vBomb.begin() + i);
@@ -183,7 +205,7 @@ void Map::CheckBombExplode()
 
 }
 
-void Map::MakeBlast(int arrX, int arrY)
+void Map::MakeBlast(int arrX, int arrY, int range)
 {
 
 	Blast *tempB;
@@ -192,6 +214,7 @@ void Map::MakeBlast(int arrX, int arrY)
 	tempB->setDirection(Blast::STATIC);
 	tempB->setArrX(arrX);
 	tempB->setArrY(arrY);
+	tempB->setBombRange(range);
 	tempB->setId(vBlast.size());
 	blastMap[tempB->getArrY()][tempB->getArrX()] = vBlast.size();
 	vBlast.push_back(tempB);
@@ -203,6 +226,7 @@ void Map::MakeBlast(int arrX, int arrY)
 		tempB->setArrX(arrX);
 		tempB->setArrY(arrY-1);
 		tempB->setId(vBlast.size());
+		tempB->setBombRange(range);
 		blastMap[tempB->getArrY()][tempB->getArrX()] = vBlast.size();
 		vBlast.push_back(tempB);
 	}
@@ -219,6 +243,7 @@ void Map::MakeBlast(int arrX, int arrY)
 		tempB->setArrX(arrX);
 		tempB->setArrY(arrY + 1);
 		tempB->setId(vBlast.size());
+		tempB->setBombRange(range);
 		blastMap[tempB->getArrY()][tempB->getArrX()] = vBlast.size();
 		vBlast.push_back(tempB);
 	}
@@ -235,6 +260,7 @@ void Map::MakeBlast(int arrX, int arrY)
 		tempB->setArrX(arrX + 1);
 		tempB->setArrY(arrY);
 		tempB->setId(vBlast.size());
+		tempB->setBombRange(range);
 		blastMap[tempB->getArrY()][tempB->getArrX()] = vBlast.size();
 		vBlast.push_back(tempB);
 	}
@@ -251,6 +277,7 @@ void Map::MakeBlast(int arrX, int arrY)
 		tempB->setArrX(arrX - 1);
 		tempB->setArrY(arrY);
 		tempB->setId(vBlast.size());
+		tempB->setBombRange(range);
 		blastMap[tempB->getArrY()][tempB->getArrX()] = vBlast.size();
 		vBlast.push_back(tempB);
 	}
@@ -288,7 +315,7 @@ void Map::CheckBlastGrow()
 	static int lastTime = timeGetTime();
 	static int currentTime;
 	int max = vBlast.size();
-	int arrY, arrX;
+	int arrY, arrX, range;
 	currentTime = timeGetTime();
 	Blast *xtempB;
 	Blast *tempB;
@@ -299,9 +326,14 @@ void Map::CheckBlastGrow()
 		xtempB = vBlast[i];
 		arrY = xtempB->getArrY();
 		arrX = xtempB->getArrX();
+		range = xtempB->getBombRange()-1;
 		if (!xtempB->getGrown())
 		{
-			if (xtempB->getGrowCount() >= xtempB->getGrowSecond())
+			if(xtempB->getBombRange() == 1)
+			{
+				xtempB->setGrown();
+			}
+			else if (xtempB->getGrowCount() >= xtempB->getGrowSecond())
 			{
 				switch (xtempB->getDirection())
 				{
@@ -313,6 +345,7 @@ void Map::CheckBlastGrow()
 						tempB->setArrX(arrX);
 						tempB->setArrY(arrY - 1);
 						tempB->setId(vBlast.size());
+						tempB->setBombRange(range);
 						blastMap[tempB->getArrY()][tempB->getArrX()] = vBlast.size();
 						vBlast.push_back(tempB);
 					}
@@ -332,6 +365,7 @@ void Map::CheckBlastGrow()
 						tempB->setArrX(arrX);
 						tempB->setArrY(arrY + 1);
 						tempB->setId(vBlast.size());
+						tempB->setBombRange(range);
 						blastMap[tempB->getArrY()][tempB->getArrX()] = vBlast.size();
 						vBlast.push_back(tempB);
 					}
@@ -351,6 +385,7 @@ void Map::CheckBlastGrow()
 						tempB->setArrX(arrX + 1);
 						tempB->setArrY(arrY);
 						tempB->setId(vBlast.size());
+						tempB->setBombRange(range);
 						blastMap[tempB->getArrY()][tempB->getArrX()] = vBlast.size();
 						vBlast.push_back(tempB);
 					}
@@ -370,6 +405,7 @@ void Map::CheckBlastGrow()
 						tempB->setArrX(arrX - 1);
 						tempB->setArrY(arrY);
 						tempB->setId(vBlast.size());
+						tempB->setBombRange(range);
 						blastMap[tempB->getArrY()][tempB->getArrX()] = vBlast.size();
 						vBlast.push_back(tempB);
 					}
@@ -411,3 +447,10 @@ int *** Map::getBlastMap()
 {
 	return &blastMap;
 }
+
+vector <Item *> & Map::getItemVector()
+{
+	return vItem;
+}
+
+
