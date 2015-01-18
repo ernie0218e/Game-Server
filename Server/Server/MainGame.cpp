@@ -11,12 +11,17 @@
 MainGame::MainGame()
 {
 	allReady = false;
+	start_game = false;
+	newChr_count = 0;
 }
 
 
 //之後要在此新增一個Game
 bool MainGame::Init()
 {
+	allReady = false;
+	start_game = false;
+	stop_game = false;
 	newChr_count = 0;
 	mainMap = new Map();
 	mainMap->MakeMap();
@@ -25,7 +30,7 @@ bool MainGame::Init()
 }
 
 
-void MainGame::Update()
+int MainGame::Update()
 {
 	FrameDelay();
 	mainMap->UpdateBombTimer();
@@ -34,25 +39,40 @@ void MainGame::Update()
 	mainMap->CheckBlastGrow();
 	for(int i = 0;i < vMainChar.size();i++){
 		if(vMainChar[i] != NULL){
-			CheckHit(vMainChar[i]);
+			if(vMainChar[i]->getHp())
+				CheckHit(vMainChar[i]);
 		}
 		if(vMainChar[i] != NULL){
 			vMainChar[i]->IncreaseDamageCount();
 		}
 		if(vMainChar[i] != NULL){
-			MoveMainChar(vMainChar[i]);
+			if(vMainChar[i]->getHp())
+				MoveMainChar(vMainChar[i]);
 		}
 	}
-	
+	CheckNewItem();
+
 	if(!allReady){
 		if(CheckReady()){
 			allReady = true;
 		}
 	}
+
+	if(allReady && ! start_game){
+		StartCount();
+	}
+
+	if(start_game && !stop_game){
+		GameCount();
+	}
+
 	// read
 	// send
 	// draw
 	// delay
+	if(stop_game)
+		return 1;
+	return 0;
 }
 
 MainGame::~MainGame()
@@ -168,6 +188,7 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 			}
 			while (step < mainMoveSpeed &&!(status&DOWN) &&
 				(*blockMap)[(int)mainTopLeftY / blockSize][(int)(mainTopLeftX - 2) / blockSize] == 0 &&
+				(*blockMap)[(int)(mainTopMidY - 1) / blockSize][(int)mainTopMidX / blockSize] == 0 &&
 				(*blockMap)[(int)mainBottomLeftY / blockSize][(int)(mainBottomLeftX - 2) / blockSize] != 0)
 			{
 				step++;
@@ -196,6 +217,7 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 			}
 			while (step < mainMoveSpeed &&!(status&DOWN) &&
 				(*blockMap)[(int)mainTopRightY / blockSize][(int)(mainTopRightX + 2) / blockSize] == 0 &&
+				(*blockMap)[(int)(mainTopMidY - 1) / blockSize][(int)mainTopMidX / blockSize] == 0 &&
 				(*blockMap)[(int)mainBottomRightY / blockSize][(int)(mainBottomRightX + 2) / blockSize] != 0)
 			{
 				step++;
@@ -211,7 +233,7 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 
 			mainChar->setFacing(MainCharacter::RIGHT);
 		}
-		if ((status&ZK) && allReady)
+		if ((status&ZK) && start_game && !stop_game)
 		{
 			int _x, _y, _r, _id;
 			_x = mainChar->getX();
@@ -307,10 +329,33 @@ void MainGame::CheckHit(MainCharacter *mainChar)
 		}
 	}
 
+	itemMap = mainMap->getItemMap();
+
+	if ((*(itemMap))[(int)mainY/blockSize][(int)mainX/blockSize] != 0)
+	{
+		switch((*(itemMap))[(int)mainY/blockSize][(int)mainX/blockSize]){
+		case BOMB_RANGE:
+			mainMap->GetItem(mainX/blockSize, mainY/blockSize, BOMB_RANGE);
+			mainChar->increaseBombDropMax();
+			break;
+		case BOMB_MAX_COUNT:
+			mainMap->GetItem(mainX/blockSize, mainY/blockSize, BOMB_MAX_COUNT);
+			mainChar->increaseBombRange();
+			break;
+		}
+
+		for(int i = 0;i < vMainChar.size();i++){
+			if(vMainChar[i] != NULL){
+				vMainChar[i]->cmd->setCmdFlag(GET_ITEM);
+			}
+		}
+	}
+
 }
 
 void MainGame::deleteChar(int d_id)
 {
+	newChr_count--;
 	for(int i = 0;i < vMainChar.size();i++){
 		if(vMainChar[i] != NULL){
 			if(vMainChar[i]->getId() == d_id){
@@ -323,10 +368,32 @@ void MainGame::deleteChar(int d_id)
 	}
 }
 
-MainCharacter* MainGame::MakeNewChar(double x,double y, int id, string name)
+MainCharacter* MainGame::MakeNewChar(int id, string name)
 {
+	newChr_count++;
 	MainCharacter *mainChar;
 	int graphCode = 0;
+	int x, y;
+	
+	switch(newChr_count % 4){
+		case 1:
+			x = 45 + 22;
+			y = 45 + 22;
+			break;
+		case 2:
+			x = 23*45 + 22;
+			y = 45 + 22;
+			break;
+		case 3:
+			x = 23*45 + 22;
+			y = 15*45 + 22;
+			break;
+		case 0:
+			x = 45 + 22;
+			y = 15*45 + 22;
+			break;
+	}
+
 	mainChar = new MainCharacter(x , y, graphCode, id, name);
 	//graphCode = (++graphCode)%2;
 	vMainChar.push_back(mainChar);
@@ -417,6 +484,33 @@ string MainGame::getCommand(MainCharacter *mainChar){
 				mainChar->cmd->getReadyID().pop();
 			}
 		}
+		if(flag & ALL_READY){
+			com += "ready";
+		}
+		if(flag & GAME_START){
+			com += "start";
+		}
+		if(flag & GAME_STOP){
+			com += "stop";
+		}
+		if(flag & NEW_ITEM){
+			while((!mainMap->getNewItem_x().empty()) && (!mainMap->getNewItem_y().empty())&& (!mainMap->getNewItemType().empty())){
+				com += "nit" + ConvertToString(mainMap->getNewItem_x().top()) + "," + ConvertToString(mainMap->getNewItem_y().top())
+					+"," + ConvertToString(mainMap->getNewItemType().top()) + ")";
+				mainMap->getNewItem_x().pop();
+				mainMap->getNewItem_y().pop();
+				mainMap->getNewItemType().pop();
+			}
+		}
+		if(flag & GET_ITEM){
+			while((!mainMap->getGetItem_x().empty()) && (!mainMap->getGetItem_y().empty())&& (!mainMap->getGetItem_type().empty())){
+				com += "git" + ConvertToString(mainMap->getGetItem_x().top()) + "," + ConvertToString(mainMap->getGetItem_y().top())
+					+"," + ConvertToString(mainMap->getGetItem_type().top()) + ")";
+				mainMap->getGetItem_x().pop();
+				mainMap->getGetItem_y().pop();
+				mainMap->getGetItem_type().pop();
+			}
+		}
 	}
 
 	mainChar->cmd->clearCmdFlag();
@@ -440,8 +534,101 @@ bool MainGame::CheckReady()
 		}
 	}
 	
-	if(vMainChar.size() == tmp)
+	if(vMainChar.size() == tmp){
 		return false;
+	}
 
+	for(int i = 0;i < vMainChar.size();i++){
+		if(vMainChar[i] != NULL){
+			vMainChar[i]->cmd->setCmdFlag(ALL_READY);
+		}
+	}
+	
 	return true;
+}
+
+void MainGame::StartCount()
+{
+	static int sTime = timeGetTime();
+	if(timeGetTime() - sTime >= 10000){
+		for(int i = 0;i < vMainChar.size();i++){
+			if(vMainChar[i] != NULL){
+				vMainChar[i]->cmd->setCmdFlag(GAME_START);
+			}
+		}
+		start_game = true;
+	}
+}
+
+void MainGame::GameCount()
+{
+	static long stat_Time = timeGetTime();
+	if(timeGetTime() - stat_Time >= 300000){
+		for(int i = 0;i < vMainChar.size();i++){
+			if(vMainChar[i] != NULL){
+				vMainChar[i]->cmd->setCmdFlag(GAME_STOP);
+			}
+		}
+		stop_game = true;
+	}
+}
+
+void MainGame::CheckHitItem(MainCharacter *)
+{
+	itemMap = mainMap->getItemMap();
+	const int blockSize = mainMap->getBlockSize();
+	const double blockScale = 2.5;
+	const double scalex = 0.5;
+	const double scaley = 0.5;
+	const double margin = 1.0;
+	double mainX, mainY;
+	mainX = mainChar->getX();
+	mainY = mainChar->getY();
+	int mainTopMidX = mainX - margin;
+	int mainTopMidY = (mainY - scaley*blockSize / 2 + margin)/blockSize;
+	int mainTopLeftX = (mainX - scalex*blockSize / 2 + margin) / blockSize;
+	int mainTopRightX = (mainX + scalex*blockSize / 2 - margin) / blockSize;
+	int mainTopLeftY = (mainY - scaley*blockSize / 2 + margin) / blockSize;
+	int mainTopRightY = (mainY - scaley*blockSize / 2 + margin) / blockSize;
+	int mainBottomLeftX = (mainX - scalex*blockSize / 2 + margin) / blockSize;
+	int mainBottomLeftY = (mainY + scaley*blockSize / 2 - margin) / blockSize;
+	int mainBottomRightX = (mainX + scalex*blockSize / 2 - margin) / blockSize;
+	int mainBottomRightY = (mainY + scaley*blockSize / 2 - margin) / blockSize;
+	int mainBottomMidX = (mainX - margin) / blockSize;
+	int mainBottomMidY = (mainY + scaley*blockSize / 2 - margin) / blockSize;
+	int mainMidLeftX = (mainX - scalex*blockSize / 2 + margin) / blockSize;
+	int mainMidLeftY = (mainY - margin) / blockSize;
+	int mainMidRightX = (mainX + scalex*blockSize / 2 + margin) / blockSize;
+	int mainMidRightY = (mainY - margin) / blockSize;
+
+	if ((*(itemMap))[(int)mainY/blockSize][(int)mainX/blockSize] != 0)
+	{
+			switch((*(itemMap))[(int)mainY/blockSize][(int)mainX/blockSize]){
+				case BOMB_RANGE:
+					mainMap->GetItem(mainX/blockSize, mainY/blockSize, BOMB_RANGE);
+					mainChar->increaseBombDropMax();
+					break;
+				case BOMB_MAX_COUNT:
+					mainMap->GetItem(mainX/blockSize, mainY/blockSize, BOMB_MAX_COUNT);
+					//mainChar->increaseBombRange();
+					break;
+			}
+			
+			for(int i = 0;i < vMainChar.size();i++){
+				if(vMainChar[i] != NULL){
+					vMainChar[i]->cmd->setCmdFlag(GET_ITEM);
+				}
+			}
+	}
+}
+
+void MainGame::CheckNewItem()
+{
+	if((!mainMap->getNewItem_x().empty()) && (!mainMap->getNewItem_y().empty()) && (!mainMap->getNewItemType().empty())){
+		for(int i = 0;i < vMainChar.size();i++){
+			if(vMainChar[i] != NULL){
+				vMainChar[i]->cmd->setCmdFlag(NEW_ITEM);
+			}
+		}
+	}
 }

@@ -48,7 +48,9 @@ public:
 	void increaseBombDropCount();
 	void increaseBombDropMax();
 	void decreaseBombDropMax();
-	int getBombRange();
+	void increaseBombRange();
+	void decreaseBombRange();
+	const int getBombRange();
 	bool Hit();
 	void MoveWithDisplacement(double dx, double dy);
 };

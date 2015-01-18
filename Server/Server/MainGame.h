@@ -12,9 +12,9 @@ public:
 	~MainGame();
 
 	bool Init();
-	void Update();
+	int Update();
 	void deleteChar(int);
-	MainCharacter* MakeNewChar(double ,double, int, string);
+	MainCharacter* MakeNewChar(int, string);
 	int generateID();
 	string getCommand(MainCharacter *);
 	//need to be public, in order to let server R/W
@@ -23,17 +23,24 @@ public:
 private:
 	
 	int ***blastMap;
+	int ***itemMap;
 	char ***blockMap;
 	MainCharacter *mainChar;
 	vector<MainCharacter*> vMainChar;
 	
 	int newChr_count;
 	bool allReady;
+	bool start_game;
+	bool stop_game;
 
 	void MoveMainChar(MainCharacter*);
 	void FrameDelay();
 	void CheckHit(MainCharacter *);
+	void CheckHitItem(MainCharacter *);
+	void CheckNewItem();
 	bool CheckReady();
+	void StartCount();
+	void GameCount();
 
 	string ConvertToString(int );
 	//press key info
@@ -53,7 +60,17 @@ private:
 		DEL_CHAR = 0x00000008,
 		NEW_BOMB = 0x00000010,
 		GET_HIT = 0x00000020,
-		READY = 0x00000040
+		READY = 0x00000040,
+		GAME_START = 0x00000080,
+		GAME_STOP = 0x00000100,
+		ALL_READY = 0x00000200,
+		GET_ITEM = 0x00000400,
+		NEW_ITEM = 0x00000800
+	};
+	
+	enum item_effect{
+		BOMB_RANGE = 2,
+		BOMB_MAX_COUNT = 3
 	};
 };
 

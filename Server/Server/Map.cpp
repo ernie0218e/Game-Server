@@ -4,13 +4,20 @@
 #include <Mmsystem.h>
 #include "stdafx.h"
 #include <vector>
+#include <fstream>
+#include <cstdlib>
 #pragma comment(lib, "Winmm.lib")
-
+const int item_p = 10;
 Map::Map() : blockX(25), blockY(17), blockSize(45)
 {
 	int i;
 	int r;
-	
+	const int MAPCOUNT = 2;
+	char chr;
+	static char *fileName = new char[100];
+	srand(timeGetTime());
+	sprintf(fileName, ".//map//%d.map", rand()%MAPCOUNT+1);
+	ifstream infile(fileName);
 	blockMap = new char*[blockX];
 	bombMap = new char*[blockX];
 	blastMap = new int*[blockX];
@@ -27,10 +34,21 @@ Map::Map() : blockX(25), blockY(17), blockSize(45)
 	for (i = 0 ; i < blockY ; i++)
 		for (r = 0; r < blockX; r++)
 		{		
+			infile>>chr;
+			switch(chr)
+			{
+			case '0':
+				blockMap[i][r] = 0;
+				break;
+			case '1':
+				blockMap[i][r] = 100;
+				break;
+			}
 			bombMap[i][r] = 0;
 			blastMap[i][r] = 99999;
 			itemMap[i][r] = 0;
 		}
+		infile.close();
 	
 }
 
@@ -54,18 +72,35 @@ void Map::MakeMap()
 	//100~200 方塊
 	//200~250 道具
 	int i, r;
-
+	srand(timeGetTime());
 	const double scale = 1.0;
 	for (i = 0; i < blockY; i++){
 		for (r = 0; r < blockX; r++)
 		{
+			if(blockMap[i][r]==100)
+				continue;
 
 			if (r == 0 || i == 0 || i == blockY - 1 || r == blockX - 1)
 				blockMap[i][r] = 100;
-			else if (r % 2 == 0 && i % 2 == 0)
-				blockMap[i][r] = 11;
-			else 
+			else if ( (i==blockY-2||i==blockY-3||i==1||i==2)&&(r==1||r==2||r==blockX-2||r==blockX-3) )
 				blockMap[i][r] = 0;
+			else 
+			{
+				switch (rand()%3)
+				{
+				case 0:
+					//blockMap[i][r] = 100;
+					blockMap[i][r] = 11;
+					break;
+				case 1:
+					blockMap[i][r] = 0;
+					break;
+				case 2:
+					blockMap[i][r] = 11;
+					break;
+				}
+
+			}
 			itemMap[i][r] = ( rand()%10 )%2;
 		}
 	}
@@ -98,13 +133,19 @@ int Map::getBlockX()
 }
 void Map::DropItem(int x, int y)
 {
+	x = x * blockSize + 0.5*blockSize;
+	y = y * blockSize + 0.5*blockSize;
+	newItem_x.push(x);
+	newItem_y.push(y);
 	Item *tempI = new Item;
 	tempI->setX(x);
 	tempI->setY(y);
 	tempI->setArrX((int)x / blockSize);
 	tempI->setArrY((int)y / blockSize);
+	tempI->setType(Item::randItemType());
+	itemMap[(int)y / blockSize][(int)x / blockSize] = tempI->getType();
+	newItem_type.push(tempI->getType());
 	vItem.push_back(tempI);
-	itemMap[(int)y / blockSize][(int)x / blockSize] = Item::randItemType();
 }
 
 bool Map::DropBomb(double x, double y, int range, int id)
@@ -118,6 +159,7 @@ bool Map::DropBomb(double x, double y, int range, int id)
 		tempB->setArrY((int)y / blockSize);
 		tempB->setID(id);
 		tempB->setBombRange(range);
+		//tempB->setBombRange(2);
 		vBomb.push_back(tempB);
 
 		bombMap[(int)y / blockSize][(int)x / blockSize] = 1;
@@ -209,7 +251,6 @@ void Map::MakeBlast(int arrX, int arrY, int range)
 {
 
 	Blast *tempB;
-
 	tempB = new Blast;
 	tempB->setDirection(Blast::STATIC);
 	tempB->setArrX(arrX);
@@ -235,6 +276,9 @@ void Map::MakeBlast(int arrX, int arrY, int range)
 		delete vBlock[(arrY - 1)*blockX + arrX];
 		vBlock[(arrY - 1)*blockX + arrX] = nullptr;
 		blockMap[arrY - 1][arrX] = 0;
+		if(!(rand() % item_p)){
+			DropItem(arrX, arrY - 1);
+		}
 	}
 	if (arrY + 1 <= blockY-1 && blockMap[arrY + 1][arrX] == 0)
 	{
@@ -252,6 +296,11 @@ void Map::MakeBlast(int arrX, int arrY, int range)
 		delete vBlock[(arrY + 1)*blockX + arrX];
 		vBlock[(arrY + 1)*blockX + arrX] = nullptr;
 		blockMap[arrY + 1][arrX] = 0;
+
+		if(!(rand() % item_p)){
+			DropItem(arrX, arrY + 1);
+		}
+
 	}
 	if (arrX + 1 <= blockX-1 && blockMap[arrY][arrX+1] == 0)
 	{
@@ -269,6 +318,11 @@ void Map::MakeBlast(int arrX, int arrY, int range)
 		delete vBlock[(arrY)*blockX + arrX+1];
 		vBlock[(arrY)*blockX + arrX+1] = nullptr;
 		blockMap[arrY][arrX+1] = 0;
+
+		if(!(rand() % item_p)){
+			DropItem(arrX + 1, arrY);
+		}
+
 	}
 	if (arrX - 1 >= 0 && blockMap[arrY][arrX-1] == 0)
 	{
@@ -286,6 +340,11 @@ void Map::MakeBlast(int arrX, int arrY, int range)
 		delete vBlock[(arrY)*blockX + arrX - 1];
 		vBlock[(arrY)*blockX + arrX - 1] = nullptr;
 		blockMap[arrY][arrX - 1] = 0;
+		
+		if(!(rand() % item_p)){
+			DropItem(arrX - 1, arrY);
+		}
+
 	}
 }
 
@@ -329,7 +388,7 @@ void Map::CheckBlastGrow()
 		range = xtempB->getBombRange()-1;
 		if (!xtempB->getGrown())
 		{
-			if(xtempB->getBombRange() == 1)
+			if(xtempB->getBombRange() <= 1)
 			{
 				xtempB->setGrown();
 			}
@@ -355,6 +414,11 @@ void Map::CheckBlastGrow()
 						vBlock[(arrY - 1)*blockX + arrX] = nullptr;
 						blockMap[arrY - 1][arrX] = 0;
 						//append to the info stream
+
+						if(!(rand() % item_p)){
+							DropItem(arrX, arrY - 1);
+						}
+
 					}
 					break;
 				case Blast::DOWN:
@@ -375,6 +439,11 @@ void Map::CheckBlastGrow()
 						vBlock[(arrY + 1)*blockX + arrX] = nullptr;
 						blockMap[arrY + 1][arrX] = 0;
 						//append to the info stream
+
+						if(!(rand() % item_p)){
+							DropItem(arrX, arrY + 1);
+						}
+
 					}
 					break;
 				case Blast::RIGHT:
@@ -395,6 +464,11 @@ void Map::CheckBlastGrow()
 						vBlock[(arrY)*blockX + arrX + 1] = nullptr;
 						blockMap[arrY][arrX + 1] = 0;
 						//append to the info stream
+
+						if(!(rand() % item_p)){
+							DropItem(arrX + 1, arrY);
+						}
+
 					}
 					break;
 				case Blast::LEFT:
@@ -415,6 +489,11 @@ void Map::CheckBlastGrow()
 						vBlock[(arrY)*blockX + arrX - 1] = nullptr;
 						blockMap[arrY][arrX - 1] = 0;
 						//append to the info stream
+
+						if(!(rand() % item_p)){
+							DropItem(arrX - 1, arrY);
+						}
+
 					}
 					break;
 				}
@@ -451,6 +530,56 @@ int *** Map::getBlastMap()
 vector <Item *> & Map::getItemVector()
 {
 	return vItem;
+}
+
+stack <int> & Map::getNewItem_x()
+{
+	return newItem_x;
+}
+
+stack <int> & Map::getNewItem_y()
+{
+	return newItem_y;
+}
+
+int *** Map::getItemMap()
+{
+	return &itemMap;
+}
+
+void Map::GetItem(int x, int y, int type)
+{
+	for(int i = 0;i < vItem.size();i++){
+		if(vItem[i]->getArrX() == x && vItem[i]->getArrY() == y){
+			getItem_x.push(x * blockSize + 0.5*blockSize);
+			getItem_y.push(y * blockSize + 0.5*blockSize);
+			getItem_type.push(vItem[i]->getType());
+			delete vItem[i];
+			vItem.erase(vItem.begin() + i);
+			itemMap[y][x] = 0;
+			break;
+		}
+	}
+}
+
+stack <int> & Map::getNewItemType()
+{
+	return newItem_type;
+}
+
+stack <int> & Map::getGetItem_x()
+{
+	return getItem_x;
+}
+
+stack <int> & Map::getGetItem_y()
+{
+	return getItem_y;
+}
+
+stack <int> & Map::getGetItem_type()
+{
+	return getItem_type;
 }
 
 

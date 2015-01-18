@@ -33,12 +33,12 @@ void Object::setWinY(double y)
 
 void Object::setX(double x)
 {
-	winX = x;
+	this->x = x;
 }
 
 void Object::setY(double y)
 {
-	winY = y;
+	this->y = y;
 }
 
 double Object::getWinX()

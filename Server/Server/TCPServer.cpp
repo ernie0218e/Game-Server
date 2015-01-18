@@ -60,8 +60,15 @@ void TCPServer::Stop()
 
 void TCPServer::gameStart(void){
 	for(;;){
-		game->Update();
+		if(game->Update())
+			break;
 	}
+	if(tcpListener != nullptr)
+		tcpListener->Stop();
+	if(listenThread != nullptr)
+		listenThread->Abort();
+	delete game;
+	this->Start();
 }
 
 void TCPServer::ListenForClients(void){
@@ -78,7 +85,7 @@ void TCPServer::ListenForClients(void){
 		Thread ^clientThread = gcnew Thread(gcnew ParameterizedThreadStart(this, &TCPServer::HandleClientComm));
 		clientThread->Start(client);
 		clientThread->Name = Convert::ToString(++thread_id);
-		msg += "Client:" + clientThread->Name + " connect." + "\n";
+		//msg += "Client:" + clientThread->Name + " connect." + "\n";
 		connection_count++;
 		//socketList->Add(client);
 	}
@@ -144,6 +151,7 @@ void TCPServer::HandleClientComm(Object ^client){
 				}
 			tcpClient->Send(myBytes);
 			charName = gcnew String(receivedata);
+			msg += "Client:" + " " + charName +" connect." + "\n";
 		}
 		receivedata = nullptr;
 		//**************end of send map**********
@@ -163,14 +171,13 @@ void TCPServer::HandleClientComm(Object ^client){
 		//**************new character************
 			ID = game->generateID();
 			MarshalString(charName, char_Name);
-			System::Diagnostics::Debug::WriteLine(Convert::ToString(char_Name.length()));
+			
 			try{
-				mainchr = game->MakeNewChar(1000, 500, ID, char_Name);
+				mainchr = game->MakeNewChar(ID, char_Name);
 			}catch(Exception ^chr_err){
 				err_msg += chr_err->Message + "\n";
 			}
 			
-			System::Diagnostics::Debug::WriteLine(ID);
 
 			myBytes = Encoding::ASCII->GetBytes(gcnew String(game->getCommand(mainchr).c_str())+"\0");
 			try{

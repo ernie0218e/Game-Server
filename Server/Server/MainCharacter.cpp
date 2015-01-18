@@ -22,7 +22,7 @@ MainCharacter::MainCharacter(double x, double y, int graphCode, int id, string n
 	hp = 5;
 	moveSpeed = 3;
 	facing = DOWN;
-	bombRange = 1;
+	bombRange = 2;
 }
 
 
@@ -126,7 +126,7 @@ std::string MainCharacter::getCharName()
 	return charName;
 }
 
-int MainCharacter::getBombRange()
+const int MainCharacter::getBombRange()
 {
 	return bombRange;
 }
@@ -160,6 +160,18 @@ void MainCharacter::decreaseBombDropMax()
 {
 	bombDropMax--;
 }
+
+void MainCharacter::increaseBombRange()
+{
+	bombRange++;
+}
+
+void MainCharacter::decreaseBombRange()
+{
+	bombRange--;
+}
+
+
 
 
 

@@ -33,7 +33,7 @@ int Item::getArrY()
 
 int Item::randItemType()
 {
-	return rand() % 2 + 1;
+	return rand() % 2 + 2;
 }
 
 void Item::setLoaded()
