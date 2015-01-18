@@ -22,12 +22,13 @@ TCPServer::~TCPServer()
 	//socketList->Clear();
 }
 
-int TCPServer::Start()
+int TCPServer::Start(int player_num)
 {
 	//******Game Initial************
 	try{
 		game = new MainGame();	
 		game->Init();
+		game->setPlayerNumber(player_num);
 		//******End Game Initial********
 		//******new	a game thread*******
 		this->gameThread = gcnew Thread(gcnew ThreadStart(this, &TCPServer::gameStart));
@@ -63,12 +64,6 @@ void TCPServer::gameStart(void){
 		if(game->Update())
 			break;
 	}
-	if(tcpListener != nullptr)
-		tcpListener->Stop();
-	if(listenThread != nullptr)
-		listenThread->Abort();
-	delete game;
-	this->Start();
 }
 
 void TCPServer::ListenForClients(void){

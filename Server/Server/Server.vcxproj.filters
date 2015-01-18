@@ -60,6 +60,12 @@
     <ClCompile Include="Item.cpp">
       <Filter>原始程式檔</Filter>
     </ClCompile>
+    <ClCompile Include="AI.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
+    <ClCompile Include="AI_System.cpp">
+      <Filter>原始程式檔</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Form1.h">
@@ -99,6 +105,12 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="Item.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="AI.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="AI_System.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>

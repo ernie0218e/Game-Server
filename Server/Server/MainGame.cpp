@@ -3,6 +3,7 @@
 #include <Mmsystem.h>
 #include <memory>
 #include <vector>
+#include <stack>
 #include <string>
 #include "stdafx.h"
 #pragma comment(lib, "Winmm.lib")
@@ -13,6 +14,7 @@ MainGame::MainGame()
 	allReady = false;
 	start_game = false;
 	newChr_count = 0;
+	player_number = 4;
 }
 
 
@@ -23,6 +25,7 @@ bool MainGame::Init()
 	start_game = false;
 	stop_game = false;
 	newChr_count = 0;
+	player_number = 4;
 	mainMap = new Map();
 	mainMap->MakeMap();
 
@@ -51,9 +54,12 @@ int MainGame::Update()
 		}
 	}
 	CheckNewItem();
+	if(CheckWin()){
+		return 1;
+	}
 
 	if(!allReady){
-		if(CheckReady()){
+		if(CheckReady() && (newChr_count == player_number)){
 			allReady = true;
 		}
 	}
@@ -70,8 +76,11 @@ int MainGame::Update()
 	// send
 	// draw
 	// delay
-	if(stop_game)
+
+	if(stop_game){
+		CheckFinalWin();
 		return 1;
+	}
 	return 0;
 }
 
@@ -254,7 +263,7 @@ void MainGame::MoveMainChar(MainCharacter* mainChar)
 			}
 
 		}
-		if(status&SPACE){
+		if(status&SPACE && newChr_count == player_number){
 			mainChar->cmd->setReady();
 			for(int i = 0;i < vMainChar.size();i++){
 				if(vMainChar[i] != NULL){
@@ -401,8 +410,9 @@ MainCharacter* MainGame::MakeNewChar(int id, string name)
 	mainChar->cmd->setCmdFlag(NEW_ALL_CHAR);
 	for(int i = 0;i < vMainChar.size();i++){
 		if(vMainChar[i] != NULL){
-			if(vMainChar[i] != mainChar)
+			if(vMainChar[i] != mainChar){
 				vMainChar[i]->cmd->setCmdFlag(NEW_CHAR, mainChar->getId());
+			}
 		}
 	}
 
@@ -511,6 +521,16 @@ string MainGame::getCommand(MainCharacter *mainChar){
 				mainMap->getGetItem_type().pop();
 			}
 		}
+		if(flag & DUCE){
+			com += "duce";
+		}
+		if(flag & WIN){
+			while(!win_id.empty()){
+				com += "win" + ConvertToString(win_id.top()) + ")";
+				win_id.pop();
+			}
+		}
+
 	}
 
 	mainChar->cmd->clearCmdFlag();
@@ -631,4 +651,100 @@ void MainGame::CheckNewItem()
 			}
 		}
 	}
+}
+
+void MainGame::setPlayerNumber(int num)
+{
+	player_number = num;
+}
+
+void MainGame::CheckFinalWin()
+{
+	int hp_max = 0;
+	if(newChr_count == 1){
+		for(int i = 0;i < vMainChar.size();i++){
+			if(vMainChar[i] != NULL){
+				win_id.push(vMainChar[i]->getId());
+				vMainChar[i]->cmd->setCmdFlag(WIN);
+				break;
+			}
+		}
+	}else{
+		for(int i = 0;i < vMainChar.size();i++){
+			if(vMainChar[i] != NULL){
+				if(vMainChar[i]->getHp() > hp_max){
+					hp_max = vMainChar[i]->getHp();
+				}
+			}
+		}
+		if(hp_max == 0){
+			for(int i = 0;i < vMainChar.size();i++){
+				if(vMainChar[i] != NULL){
+					vMainChar[i]->cmd->setCmdFlag(DUCE);
+				}
+			}
+		}else{
+			for(int i = 0;i < vMainChar.size();i++){
+				if(vMainChar[i] != NULL){
+					if(vMainChar[i]->getHp() == hp_max)
+						win_id.push(vMainChar[i]->getId());
+				}
+			}
+			if(win_id.size()==newChr_count){
+				for(int i = 0;i < vMainChar.size();i++){
+					if(vMainChar[i] != NULL){
+						vMainChar[i]->cmd->setCmdFlag(DUCE);
+					}
+				}
+				while(!win_id.empty()){
+					win_id.pop();
+				}
+			}else{
+				for(int i = 0;i < vMainChar.size();i++){
+					if(vMainChar[i] != NULL){
+						vMainChar[i]->cmd->setCmdFlag(WIN);
+					}
+				}
+			}
+		}
+
+	}
+}
+
+bool MainGame::CheckWin()
+{
+	int tmp = 0;
+	if(!newChr_count && start_game){
+		return true;
+	}
+	if(newChr_count == 1 && start_game){
+		for(int i = 0;i < vMainChar.size();i++){
+			if(vMainChar[i] != NULL){
+				win_id.push(vMainChar[i]->getId());
+				vMainChar[i]->cmd->setCmdFlag(WIN);
+				break;
+			}
+		}
+		return true;
+	}else if(start_game){
+		for(int i = 0;i < vMainChar.size();i++){
+			if(vMainChar[i] != NULL){
+				if(vMainChar[i]->getHp() > 0){
+					tmp++;
+				}
+			}
+		}
+		if(tmp == 1){
+			for(int i = 0;i < vMainChar.size();i++){
+				if(vMainChar[i] != NULL){
+					if(vMainChar[i]->getHp() > 0){
+						win_id.push(vMainChar[i]->getId());
+					}
+					vMainChar[i]->cmd->setCmdFlag(WIN);
+				}
+			}
+			return true;
+		}
+	}
+	return false;
 }

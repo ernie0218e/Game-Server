@@ -28,7 +28,7 @@ private:
 public:
 	TCPServer();
 	~TCPServer();
-	int Start();
+	int Start(int);
 	void Stop();
 	void setIP(String ^);
 	String^ serverIP();

@@ -87,6 +87,8 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AI.cpp" />
+    <ClCompile Include="AI_System.cpp" />
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="Blast.cpp" />
     <ClCompile Include="Block.cpp" />
@@ -107,6 +109,8 @@
     <ClCompile Include="TCPServer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AI.h" />
+    <ClInclude Include="AI_System.h" />
     <ClInclude Include="Blast.h" />
     <ClInclude Include="Block.h" />
     <ClInclude Include="Bomb.h" />

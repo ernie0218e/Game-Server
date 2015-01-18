@@ -72,6 +72,9 @@ namespace Server {
 	private: TCPServer ^test;
 	private: System::String^ err_msg;
 	private: System::Windows::Forms::Button^  button1;
+	private: System::Windows::Forms::NumericUpDown^  player_num;
+
+	private: System::Windows::Forms::Label^  label3;
 	private: System::String^ msg;
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -91,6 +94,9 @@ namespace Server {
 			this->Log = (gcnew System::Windows::Forms::RichTextBox());
 			this->Stop_server = (gcnew System::Windows::Forms::Button());
 			this->button1 = (gcnew System::Windows::Forms::Button());
+			this->player_num = (gcnew System::Windows::Forms::NumericUpDown());
+			this->label3 = (gcnew System::Windows::Forms::Label());
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->player_num))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// IPlabel
@@ -198,11 +204,34 @@ namespace Server {
 			this->button1->UseVisualStyleBackColor = true;
 			this->button1->Click += gcnew System::EventHandler(this, &Form1::button1_Click);
 			// 
+			// player_num
+			// 
+			this->player_num->Location = System::Drawing::Point(12, 265);
+			this->player_num->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {4, 0, 0, 0});
+			this->player_num->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {2, 0, 0, 0});
+			this->player_num->Name = L"player_num";
+			this->player_num->Size = System::Drawing::Size(120, 25);
+			this->player_num->TabIndex = 9;
+			this->player_num->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {4, 0, 0, 0});
+			// 
+			// label3
+			// 
+			this->label3->AutoSize = true;
+			this->label3->Font = (gcnew System::Drawing::Font(L"微軟正黑體", 9, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(0)));
+			this->label3->Location = System::Drawing::Point(8, 243);
+			this->label3->Name = L"label3";
+			this->label3->Size = System::Drawing::Size(117, 19);
+			this->label3->TabIndex = 10;
+			this->label3->Text = L"Player Number:";
+			// 
 			// Form1
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 15);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(564, 428);
+			this->Controls->Add(this->label3);
+			this->Controls->Add(this->player_num);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->Stop_server);
 			this->Controls->Add(this->Log);
@@ -214,6 +243,7 @@ namespace Server {
 			this->Controls->Add(this->IPlabel);
 			this->Name = L"Form1";
 			this->Text = L"Server";
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->player_num))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -221,9 +251,10 @@ namespace Server {
 #pragma endregion
 	private: System::Void Start_server_Click(System::Object^  sender, System::EventArgs^  e) {
 				 test->setIP(comboBox1->Text);
-				 test->Start();
+				 test->Start(Convert::ToInt32(player_num->Text));
 				 IPlabel->Text = test->serverIP();
 				 Log->Text += "Server Start!!\n";
+				 Log->Text += "The required player number is:" + player_num->Text + "\n";
 				 timer1->Start();
 			 }
 	private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {

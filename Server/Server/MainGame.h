@@ -17,6 +17,7 @@ public:
 	MainCharacter* MakeNewChar(int, string);
 	int generateID();
 	string getCommand(MainCharacter *);
+	void setPlayerNumber(int);
 	//need to be public, in order to let server R/W
 	Map *mainMap;
 	
@@ -27,8 +28,10 @@ private:
 	char ***blockMap;
 	MainCharacter *mainChar;
 	vector<MainCharacter*> vMainChar;
-	
+	stack <int> win_id;
+
 	int newChr_count;
+	int player_number;
 	bool allReady;
 	bool start_game;
 	bool stop_game;
@@ -38,6 +41,8 @@ private:
 	void CheckHit(MainCharacter *);
 	void CheckHitItem(MainCharacter *);
 	void CheckNewItem();
+	void CheckFinalWin();
+	bool CheckWin();
 	bool CheckReady();
 	void StartCount();
 	void GameCount();
@@ -65,7 +70,9 @@ private:
 		GAME_STOP = 0x00000100,
 		ALL_READY = 0x00000200,
 		GET_ITEM = 0x00000400,
-		NEW_ITEM = 0x00000800
+		NEW_ITEM = 0x00000800,
+		WIN = 0x00001000,
+		DUCE = 0x00002000
 	};
 	
 	enum item_effect{
