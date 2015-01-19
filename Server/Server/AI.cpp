@@ -3,7 +3,9 @@
 #define blocksize 45
 AI::AI()
 {
+	evading = false;
 	me = nullptr;
+	myPath.clear();
 }
 
 
@@ -140,14 +142,14 @@ void AI::setArrY()
 
 }
 
-void AI::setFinalArrX()
+void AI::setFinalArrX(int x)
 {
-
+	finalArrX = x;
 }
 
-void AI::setFinalArrY()
+void AI::setFinalArrY(int y)
 {
-
+	finalArrY = y;
 }
 
 const vector <int> & AI::getKeyVector()
@@ -165,6 +167,60 @@ int AI::getArrY()
 {
 	return arrY;
 }
+
+void AI::OverRide()
+{
+	key.clear();
+}
+
+void AI::setEvading()
+{
+	evading = true;
+}
+
+bool AI::getEvading()
+{
+	return evading;
+}
+
+void AI::clearEvading()
+{
+	evading = false;
+}
+
+int AI::getFinalArrX()
+{
+	return finalArrX;
+}
+
+int AI::getFinalArrY()
+{
+	return finalArrY;
+}
+
+MainCharacter * AI::getMe()
+{
+	return me;
+}
+
+int AI::getMoveSpeed()
+{
+	return moveSpeed;
+}
+
+void AI::DropBomb()
+{
+	key[0]|=ZK;
+}
+
+
+
+
+
+
+
+
+
 
 node::node(int xp, int yp, int d, int p)
 {
@@ -315,14 +371,38 @@ void Findroad::setmap(char ***loadmap)
 	}
 	*/
 }
+void Findroad::setMoveMap(char ***loadmap)
+{
+	int x, y;
+	int i, j,r;
+	
+	for (int y = 0; y<m; y++)
+	{
+		for (int x = 0; x < n; x++)
+		{
+			if ( (*loadmap)[y][x] == 100 ) 
+				map[x][y] = 1;
+			else
+				map[x][y] = 0;
+		}
+				
+	}
+
+}
 string Findroad::pathFind(const int  &xStart, const int  &yStart, const int  &xFinish, const int  &yFinish)
 {
-	static priority_queue<node> pq[2];
+	/*static priority_queue<node> pq[2];
 	static int pqi = 0;
 	static int i, j, x, y, xdx, ydy;
 	static char c;
 	static int dx[4] = { 1, 0, -1, 0 };
-	static int dy[4] = { 0, 1, 0, -1 };
+	static int dy[4] = { 0, 1, 0, -1 };*/
+	priority_queue<node> pq[2];
+	int pqi = 0;
+	int i, j, x, y, xdx, ydy;
+	char c;
+	int dx[4] = { 1, 0, -1, 0 };
+	int dy[4] = { 0, 1, 0, -1 };
 
 	// create the start node and push into list of open nodes
 	n0 = new node(xStart, yStart, 0, 0);

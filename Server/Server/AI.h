@@ -8,6 +8,7 @@
 #include <queue>
 #include <algorithm>
 #include <iostream>
+#include "MainGame.h"
 #pragma once
 using namespace std;
 class AI
@@ -21,8 +22,10 @@ class AI
 	int finalArrX;
 	int finalArrY;
 	int moveSpeed;
+	bool evading;
 	vector <int> key;
 	vector <int> command;
+	
 	MainCharacter *me;
 	enum{
 		UP = 0x00000001,
@@ -35,6 +38,7 @@ class AI
 
 public:
 	AI();
+	string myPath;
 	void AssignMe(MainCharacter *);
 	void Update();
 	void MoveRight();
@@ -47,13 +51,22 @@ public:
 	void setArrY();
 	int getArrX();
 	int getArrY();
-	void setFinalArrX();
-	void setFinalArrY();
+	void setFinalArrX(int x);
+	void setFinalArrY(int y);
+	int getFinalArrX();
+	int getFinalArrY();
+	int getMoveSpeed();
 	void ProxX();
 	void ProxY();
 	int getKey();
 	bool empty();
 	bool MoveDone();
+	void OverRide();
+	void setEvading();
+	bool getEvading();
+	void DropBomb();
+	void clearEvading();
+	MainCharacter *getMe();
 	const vector <int> & getKeyVector();
 	~AI();
 };
@@ -105,7 +118,7 @@ public:
 	Findroad(int, int);
 	~Findroad();
 	void	setmap(char ***loadmap);
-
+	void	setMoveMap(char ***loadmap);
 	string pathFind(const int  &xStart, const int  &yStart, const int  &xFinish, const int  &yFinish);
 	int getmap(int x,int y);
 };

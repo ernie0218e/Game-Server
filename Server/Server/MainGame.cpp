@@ -525,9 +525,9 @@ string MainGame::getCommand(MainCharacter *mainChar){
 			com += "duce";
 		}
 		if(flag & WIN){
-			while(!win_id.empty()){
-				com += "win" + ConvertToString(win_id.top()) + ")";
-				win_id.pop();
+			while(!(mainChar->cmd->getWinID().empty())){
+				com += "win" + ConvertToString(mainChar->cmd->getWinID().top()) + ")";
+				mainChar->cmd->getWinID().pop();
 			}
 		}
 
@@ -666,6 +666,7 @@ void MainGame::CheckFinalWin()
 			if(vMainChar[i] != NULL){
 				win_id.push(vMainChar[i]->getId());
 				vMainChar[i]->cmd->setCmdFlag(WIN);
+				vMainChar[i]->cmd->setWinID(vMainChar[i]->getId());
 				break;
 			}
 		}
@@ -686,8 +687,10 @@ void MainGame::CheckFinalWin()
 		}else{
 			for(int i = 0;i < vMainChar.size();i++){
 				if(vMainChar[i] != NULL){
-					if(vMainChar[i]->getHp() == hp_max)
+					if(vMainChar[i]->getHp() == hp_max){
 						win_id.push(vMainChar[i]->getId());
+						vMainChar[i]->cmd->setWinID(vMainChar[i]->getId());
+					}
 				}
 			}
 			if(win_id.size()==newChr_count){
@@ -722,6 +725,7 @@ bool MainGame::CheckWin()
 			if(vMainChar[i] != NULL){
 				win_id.push(vMainChar[i]->getId());
 				vMainChar[i]->cmd->setCmdFlag(WIN);
+				vMainChar[i]->cmd->setWinID(vMainChar[i]->getId());
 				break;
 			}
 		}
@@ -734,11 +738,24 @@ bool MainGame::CheckWin()
 				}
 			}
 		}
+
+		if(tmp == 0){
+			for(int i = 0;i < vMainChar.size();i++){
+				if(vMainChar[i] != NULL){
+					vMainChar[i]->cmd->setCmdFlag(DUCE);
+				}
+			}
+			return true;
+		}
+
 		if(tmp == 1){
 			for(int i = 0;i < vMainChar.size();i++){
 				if(vMainChar[i] != NULL){
 					if(vMainChar[i]->getHp() > 0){
 						win_id.push(vMainChar[i]->getId());
+						for(int j = 0;j < vMainChar.size();j++)
+							if(vMainChar[j] != NULL)
+								vMainChar[j]->cmd->setWinID(vMainChar[i]->getId());
 					}
 					vMainChar[i]->cmd->setCmdFlag(WIN);
 				}
@@ -747,4 +764,9 @@ bool MainGame::CheckWin()
 		}
 	}
 	return false;
+}
+
+bool MainGame::getGameStop()
+{
+	return stop_game;
 }

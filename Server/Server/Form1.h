@@ -280,8 +280,8 @@ namespace Server {
 #pragma endregion
 	private: System::Void Start_server_Click(System::Object^  sender, System::EventArgs^  e) {
 				 test->setIP(comboBox1->Text);
-				 test->Start(Convert::ToInt32(player_num->Text) + Convert::ToInt32(numericUpDown1->Text));
 				 test->setAINum(Convert::ToInt32(numericUpDown1->Text));
+				 test->Start(Convert::ToInt32(player_num->Text) + Convert::ToInt32(numericUpDown1->Text));
 				 IPlabel->Text = test->serverIP();
 				 Log->Text += "Server Start!!\n";
 				 Log->Text += "The required player number is:" + player_num->Text + "\n";

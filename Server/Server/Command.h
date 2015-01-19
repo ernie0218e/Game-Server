@@ -12,6 +12,7 @@ class Command
 	stack<int> bomb_range;
 	stack<int> hit_id;
 	stack<int> ready_id;
+	stack<int> win_id;
 public:
 	Command(void);
 	~Command(void);
@@ -24,11 +25,13 @@ public:
 	stack<int>& getHitID();
 	stack<int>& getReadyID();
 	stack<int>& getBombRange();
+	stack<int>& getWinID();
 	void setCmdFlag(int);
 	void setCmdFlag(int, int);
 	void setBomb(int, int, int);
 	void setHitID(int);
 	void setReadyID(int);
+	void setWinID(int);
 	void setReady();
 	void clearNewCharID();
 	void clearDelCharID();

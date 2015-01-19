@@ -18,8 +18,10 @@ public:
 	int generateID();
 	string getCommand(MainCharacter *);
 	void setPlayerNumber(int);
+	bool getGameStop();
 	//need to be public, in order to let server R/W
 	Map *mainMap;
+	vector<MainCharacter*> vMainChar;
 	
 private:
 	
@@ -27,7 +29,6 @@ private:
 	int ***itemMap;
 	char ***blockMap;
 	MainCharacter *mainChar;
-	vector<MainCharacter*> vMainChar;
 	stack <int> win_id;
 
 	int newChr_count;

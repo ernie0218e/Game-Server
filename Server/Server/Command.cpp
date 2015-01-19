@@ -120,3 +120,13 @@ int Command::getReady()
 {
 	return ready;
 }
+
+void Command::setWinID(int _id)
+{
+	win_id.push(_id);
+}
+
+stack<int>& Command::getWinID()
+{
+	return win_id;
+}

@@ -20,6 +20,7 @@ private:
 	Thread^ gameThread;
 	Thread^ aiThread;
 	int aiNumber;
+	int gameStop;
 	//List<Socket^>^ socketList;
 	int connection_count;
 	void gameStart(void);

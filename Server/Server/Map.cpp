@@ -84,7 +84,7 @@ void Map::MakeMap()
 				blockMap[i][r] = 100;
 			else if ( (i==blockY-2||i==blockY-3||i==1||i==2)&&(r==1||r==2||r==blockX-2||r==blockX-3) )
 				blockMap[i][r] = 0;
-			/*else 
+			else 
 			{
 				switch (rand()%3)
 				{
@@ -100,7 +100,7 @@ void Map::MakeMap()
 					break;
 				}
 
-			}*/
+			}
 		}
 	}
 	for (i = 0; i < blockY; i++){

@@ -10,6 +10,8 @@ TCPServer::TCPServer(void){
 	listenThread = nullptr;
 	tcpListener = nullptr;
 	connection_count = 0;
+	aiNumber = 0;
+	gameStop = 0;
 }
 
 TCPServer::~TCPServer()
@@ -21,10 +23,12 @@ TCPServer::~TCPServer()
 	if(gameThread != nullptr)
 		gameThread->Abort();
 	//socketList->Clear();
+	gameStop = 1;
 }
 
 int TCPServer::Start(int player_num)
 {
+	gameStop = 0;
 	//******Game Initial************
 	try{
 		game = new MainGame();	
@@ -58,7 +62,9 @@ void TCPServer::Stop()
 		listenThread->Abort();
 	if(gameThread != nullptr)
 		gameThread->Abort();
+	
 	//socketList->Clear();
+	gameStop = 1;
 }
 
 
@@ -257,10 +263,14 @@ void TCPServer::setAINum(int num)
 
 void TCPServer::NewAIThread()
 {
-	for(int i = 0; i < 1;i++){
-		aiThread = gcnew Thread(gcnew ThreadStart(this, &TCPServer::aiClient));
-		aiThread->Start();
-		Sleep(160);
+	for(int i = 0; i < aiNumber;i++){
+		try{
+			aiThread = gcnew Thread(gcnew ThreadStart(this, &TCPServer::aiClient));
+			aiThread->Start();
+			Sleep(200);
+		}catch(Exception ^thread_err){
+			err_msg += "can't new AI\n";
+		}
 	}
 }
 
@@ -277,7 +287,7 @@ void TCPServer::aiClient()
 		return;
 	}
 	try{
-		ai_sys = new AI_System(mainchr, game->mainMap);
+		ai_sys = new AI_System(mainchr, game->mainMap, game);
 	}catch(Exception ^ai_err){
 		err_msg += ai_err->Message + "\n";
 		return;
@@ -291,6 +301,9 @@ void TCPServer::aiClient()
 		game->getCommand(mainchr);
 		if(mainchr->getHp() <= 0)
 			break;
+		if(gameStop){
+			break;
+		}
 	}
 	game->deleteChar(mainchr->getId());
 }
